@@ -5,13 +5,6 @@ import java.nio.ByteBuffer;
 public class SignalGenerator {
     public static final int SAMPLING_RATE = 48000;
 
-    public static void generateSquareSignal(byte[] buffer) {
-        int length = buffer.length;
-        for (int i = 0; i < length; i++) {
-            buffer[i] = (byte) (i >= length / 2 ? 0 : 1);
-        }
-    }
-
     public static short[] getSamplesOfSineSignal(double baseTime) {
         int numberOfSamples = UDPSender.PACKET_SIZE / 2;
         short[] samples = new short[numberOfSamples];
