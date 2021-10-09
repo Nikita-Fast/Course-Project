@@ -8,9 +8,8 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     MainWindow w;
     w.show();
-
-    MyUDP receiver;
-    receiver.readyReadMethod();
+    MyUDP signalProcessor(nullptr, &w);
+    signalProcessor.readyReadMethod();
 
     return a.exec();
 }

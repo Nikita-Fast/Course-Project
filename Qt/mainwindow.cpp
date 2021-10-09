@@ -12,9 +12,25 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::paintEvent(QPaintEvent *e)
+{
+    QPainter painter(this);
+    QPen pointPen(Qt::red);
+    pointPen.setWidth(3);
+    painter.setPen(pointPen);
+
+    painter.drawPolyline(myPoints.data(), static_cast<int>(myPoints.size()));
+}
+
 
 void MainWindow::on_pushButton_clicked()
 {
-    ui->label->setText("Listening port 50001!");
+    myPoints.clear();
+    update();
+}
+
+std::vector<QPoint> &MainWindow::getMyPoints()
+{
+    return myPoints;
 }
 

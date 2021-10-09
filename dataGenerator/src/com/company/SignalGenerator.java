@@ -11,14 +11,8 @@ public class SignalGenerator {
             buffer[i] = (byte) (i >= length / 2 ? 0 : 1);
         }
     }
-    /*
-    * fill a given packet with samples of sine signal
-    * 48k samples for a second
-    * 750 of packs filled with shorts
-    * so we have 750 packets in a second
-    * */
+
     public static short[] getSamplesOfSineSignal(double baseTime) {
-        //numberOfSamples assumed to be half of UDPSender.PACKET_SIZE
         int numberOfSamples = UDPSender.PACKET_SIZE / 2;
         short[] samples = new short[numberOfSamples];
         double step = 1.0 / SAMPLING_RATE;
