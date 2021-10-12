@@ -34,9 +34,10 @@ void MyUDP::readyReadMethod() {
         short samples[Buffer.size() / 2];
         packetToArray(Buffer, samples);
         packetsReceived++;
+        //printSamples(samples, Buffer.size() / 2);
 
         if (!packetMarkedAsLast(Buffer)) {
-            drawSamples(samples, Buffer.size() / 2, 0.004, packetsReceived - 1);
+            drawSamples(samples, Buffer.size() / 2, 0.005, packetsReceived - 1);
         }
         else {
             finishMeasuringNetworkSpeed(Buffer.size());
@@ -46,15 +47,15 @@ void MyUDP::readyReadMethod() {
 }
 
 void MyUDP::drawSamples(short samples[], int length, double pixels_on_single_sample, int packets_already_drawn) {
-    int scale = 200;
+    int scale = 32767 / (mainWindow -> getBlackboardHeight() / 2 - 75);
     for (int i = 0; i < length; i++) {
-        int y = mainWindow -> height() / 2 - samples[i] / scale;
+        int y = mainWindow -> getBlackboardHeight() / 2 - samples[i] / scale;
 
         int samples_drawn_before = packets_already_drawn * length + i;
         int x = samples_drawn_before * pixels_on_single_sample;
 
         QPoint point(x, y);
-        mainWindow->getMyPoints().push_back(point);
+        mainWindow->addPoint(point);
     }
     mainWindow->update();
 }

@@ -1,10 +1,11 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), blackboard(this)
 {
     ui->setupUi(this);
-
+    blackboard.setGeometry(30, 40, width(), height());
+    connect(ui->clearBtn, &QPushButton::clicked, &blackboard, &DrawingSurface::clearButtonClicked);
 }
 
 MainWindow::~MainWindow()
@@ -14,23 +15,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::paintEvent(QPaintEvent *e)
 {
-    QPainter painter(this);
-    QPen pointPen(Qt::red);
-    pointPen.setWidth(3);
-    painter.setPen(pointPen);
-
-    painter.drawPolyline(myPoints.data(), static_cast<int>(myPoints.size()));
+    blackboard.update();
 }
 
-
-void MainWindow::on_pushButton_clicked()
-{
-    myPoints.clear();
-    update();
+void MainWindow::addPoint(QPoint point) {
+    blackboard.getMyPoints().push_back(point);
 }
 
-std::vector<QPoint> &MainWindow::getMyPoints()
-{
-    return myPoints;
+int MainWindow::getBlackboardHeight() {
+    return blackboard.height();
 }
 

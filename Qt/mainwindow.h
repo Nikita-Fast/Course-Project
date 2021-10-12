@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QtCore>
 #include <QtGui>
+#include "drawingsurface.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -17,15 +18,12 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
-    std::vector<QPoint> &getMyPoints();
-
-private slots:
-    void on_pushButton_clicked();
+    void addPoint(QPoint point);
+    int getBlackboardHeight();
 
 private:
     Ui::MainWindow *ui;
-    std::vector<QPoint> myPoints;
+    DrawingSurface blackboard;
 
 protected:
     void paintEvent(QPaintEvent *e);
