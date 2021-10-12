@@ -10,7 +10,9 @@ public class SignalGenerator {
         short[] samples = new short[numberOfSamples];
         double step = 1.0 / SAMPLING_RATE;
         for (int i = 0; i < numberOfSamples; i++) {
-            samples[i] = sineSignal(baseTime + i * step);
+            //samples[i] = sineSignal(baseTime + i * step);
+            //samples[i] = sineSignal2(baseTime + i * step);
+            samples[i] = sawtoothWave(baseTime + i * step);
         }
         return samples;
     }
@@ -34,6 +36,19 @@ public class SignalGenerator {
     public static short sineSignal(double time) {
         double v = Math.sin(time);
         v *= 32767;
+        return (short)v;
+    }
+
+    public static short sineSignal2(double time) {
+        double v = Math.sin(5*time) + Math.sin(66*time) + Math.sin(37*time);
+        v *= 32767;
+        v /= 3;
+        return (short)v;
+    }
+
+    public static short sawtoothWave(double time) {
+        int freqHz = 3;
+        double v = 2 * 32767 * (time * freqHz - (Math.floor(1.0 / 2.0 + time * freqHz)));
         return (short)v;
     }
 }
