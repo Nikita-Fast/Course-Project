@@ -22,8 +22,8 @@ public class UDPSender {
         while (doubleToIntDeviation(sendingFrequencyInMillis) > TOLERANCE) {
             packetsPerOneSending *= 2;
             sendingFrequencyInMillis *= 2;
-            /*System.out.println("packetsPerOneSending: " + packetsPerOneSending);
-            System.out.println("sendingFrequencyInMillis: " + sendingFrequencyInMillis);*/
+            System.out.println("packetsPerOneSending: " + packetsPerOneSending);
+            System.out.println("sendingFrequencyInMillis: " + sendingFrequencyInMillis);
         }
 
         send(signalDuration, (int)sendingFrequencyInMillis, packetsPerOneSending);

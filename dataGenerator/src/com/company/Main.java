@@ -4,6 +4,6 @@ public class Main {
 
     public static void main(String[] args) {
 
-        UDPSender.send(3, 100);
+        UDPSender.send(30, SignalGenerator.SAMPLING_RATE * 2 / 1024.0);
     }
 }

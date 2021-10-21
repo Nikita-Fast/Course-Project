@@ -2,24 +2,27 @@
 #define DRAWINGSURFACE_H
 
 #include <QWidget>
+#include "Constants.h"
 
 class DrawingSurface : public QWidget
 {
     Q_OBJECT
 public:
     explicit DrawingSurface(QWidget *parent = nullptr);
-    std::vector<QPoint> &getMyPoints();
 
 signals:
+    void pointsDrawn();
 
 public slots:
-    void clearButtonClicked();
+    void receiveDrawingRequest(QPoint *points, int length);
 
 protected:
-    void paintEvent(QPaintEvent *event);
+    void paintEvent(QPaintEvent *);
 
 private:
-    std::vector<QPoint> myPoints;
+    QPoint *points = nullptr;
+    int length = 0;
+    void drawGrid();
 
 };
 
