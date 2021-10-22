@@ -31,6 +31,10 @@ private slots:
     void xScaleUpdated(double x_scale);
     void yScaleUpdated(double y_scale);
 
+    void on_pushButton_5_clicked();
+
+    void on_pushButton_6_clicked();
+
 private:
     Ui::Controller *ui;
     Udp udp;

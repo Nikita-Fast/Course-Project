@@ -34,7 +34,7 @@ public class UDPSender {
 
         final int numberOfPacketsToBeSent = PACKETS_FOR_ONE_SEC_OF_SIGNAL * signalDuration;
         final CountDownLatch remainingTimerIterations =
-                new CountDownLatch(numberOfPacketsToBeSent + 1);
+                new CountDownLatch(numberOfPacketsToBeSent /*+ 1*/);
 
         try (DatagramSocket socket = new DatagramSocket()) {
             InetAddress inetAddress = InetAddress.getByName(HOST_NAME);
@@ -51,14 +51,19 @@ public class UDPSender {
                             }
 
                             byte[] packet;
-                            if (remainingTimerIterations.getCount() == 1) {
-                                packet = generateMarkedAsLastPacket();
-                            } else {
-                                int packetNumber = numberOfPacketsToBeSent - (int) remainingTimerIterations.getCount();
-                                double startTimeForPacket = (double) packetNumber / PACKETS_FOR_ONE_SEC_OF_SIGNAL;
-                                short[] samples = SignalGenerator.getSamplesOfSineSignal(startTimeForPacket);
-                                packet = SignalGenerator.putSamplesToPacket(samples);
-                            }
+//                            if (remainingTimerIterations.getCount() == 1) {
+//                                packet = generateMarkedAsLastPacket();
+//                            } else {
+//                                int packetNumber = numberOfPacketsToBeSent - (int) remainingTimerIterations.getCount();
+//                                double startTimeForPacket = (double) packetNumber / PACKETS_FOR_ONE_SEC_OF_SIGNAL;
+//                                short[] samples = SignalGenerator.getSamplesOfSineSignal(startTimeForPacket);
+//                                packet = SignalGenerator.putSamplesToPacket(samples);
+//                            }
+
+                            int packetNumber = numberOfPacketsToBeSent - (int) remainingTimerIterations.getCount();
+                            double startTimeForPacket = (double) packetNumber / PACKETS_FOR_ONE_SEC_OF_SIGNAL;
+                            short[] samples = SignalGenerator.getSamplesOfSineSignal(startTimeForPacket);
+                            packet = SignalGenerator.putSamplesToPacket(samples);
 
                             DatagramPacket outgoing = new DatagramPacket(packet, PACKET_SIZE, inetAddress, SERVICE_PORT);
                             socket.send(outgoing);

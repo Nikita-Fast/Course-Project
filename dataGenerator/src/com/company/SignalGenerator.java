@@ -3,7 +3,7 @@ package com.company;
 import java.nio.ByteBuffer;
 
 public class SignalGenerator {
-    public static final int SAMPLING_RATE = 2048;
+    public static final int SAMPLING_RATE = 2048 * 4;
 
     public static short[] getSamplesOfSineSignal(double baseTime) {
         int numberOfSamples = UDPSender.PACKET_SIZE / 2;
@@ -34,20 +34,22 @@ public class SignalGenerator {
     }
 
     public static short sineSignal(double time) {
-        double v = Math.sin(time * 3* 2 * Math.PI);
+        double v = Math.sin(time * 4 * 2 * Math.PI);
         v *= 32767;
         return (short)v;
     }
 
     public static short sineSignal2(double time) {
-        double v = Math.sin(3*time) + Math.sin(16*time) + Math.sin(78*time);
+        double p = 2 * Math.PI;
+        double v = Math.sin(1*time* p) + Math.sin(3*time* p) + Math.sin(8*time* p);
         v *= 32767;
         v /= 3;
         return (short)v;
     }
 
     public static short sawtoothWave(double time) {
-        int freqHz = 11;
+        //int freqHz = 20;
+        double freqHz = 1;
         double v = 2 * 32767 * (time * freqHz - (Math.floor(1.0 / 2.0 + time * freqHz)));
         return (short)v;
     }

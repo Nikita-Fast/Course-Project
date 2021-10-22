@@ -59,3 +59,15 @@ void Controller::on_pushButton_4_clicked()
     drawingProcessor.reduceScaleY();
 }
 
+
+void Controller::on_pushButton_5_clicked()
+{
+    //drawingProcessor.shiftDrawingsToLeft(25);
+}
+
+
+void Controller::on_pushButton_6_clicked()
+{
+    //drawingProcessor.shiftToRight(25);
+}
+
