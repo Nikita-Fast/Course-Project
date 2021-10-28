@@ -189,7 +189,7 @@ void DrawingProcessor::shiftDrawingsToLeft() {
         }
     }
 
-    memmove(points, points + num, sizeof(QPoint) * (pointsNumber - num));
+    memmove(points, points + num, sizeof(QPoint) * (pointsNumber - num)); // TODO - сдвиг памяти может быть не удачным решением. Это открытый вопрос. Может быть надо использовать циклическую индексацию
     pointsNumber -= num;
 }
 

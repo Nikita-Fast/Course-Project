@@ -11,7 +11,7 @@ class DrawingProcessor : public QObject
 public:
     explicit DrawingProcessor(QObject *parent = nullptr);
 
-    void enlargePixelSize();
+    void enlargePixelSize(); // TODO зачем менять размер пикселя ?
     void reducePixelSize();
     void enlargeScaleY();
     void reduceScaleY();
@@ -47,7 +47,7 @@ private:
 
     double pixel_size_ms = 1;
     double y_scale = 200;
-    QPoint points[WINDOW_WIDTH/*BUFFER_SIZE*/];
+    QPoint points[WINDOW_WIDTH/*BUFFER_SIZE*/]; //TOOD зачем нам статичный буфер?
     int pointsNumber = 0;
 //    int sample_offset = 0;
 //    double prev_buffer_offset_ms = 0.0;
