@@ -9,21 +9,18 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    drawingprocessor.cpp \
-    drawingsurface.cpp \
+    dataprocessor.cpp \
     main.cpp \
-    controller.cpp \
-    udp.cpp
+    oscilloscope.cpp \
+    screen.cpp \
+    udpinterface.cpp
 
 HEADERS += \
-    Constants.h \
-    controller.h \
-    drawingprocessor.h \
-    drawingsurface.h \
-    udp.h
-
-FORMS += \
-    controller.ui
+    datainterface.h \
+    dataprocessor.h \
+    oscilloscope.h \
+    screen.h \
+    udpinterface.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

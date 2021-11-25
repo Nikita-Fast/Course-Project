@@ -26,6 +26,8 @@ public class UDPSender {
             System.out.println("sendingFrequencyInMillis: " + sendingFrequencyInMillis);
         }
 
+        double speed = (128 * packetsPerOneSending / 1024.0) / (int)(sendingFrequencyInMillis) * 1000;
+        System.out.println("speed: " + speed);
         send(signalDuration, (int)sendingFrequencyInMillis, packetsPerOneSending);
 
     }

@@ -1,13 +1,14 @@
-#include "controller.h"
+#include "oscilloscope.h"
 
 #include <QApplication>
-#include <QtDebug>
+
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    Controller w;
+    Oscilloscope w;
     w.show();
+
 
     return a.exec();
 }
