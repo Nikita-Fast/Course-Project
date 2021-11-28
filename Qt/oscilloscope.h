@@ -2,11 +2,13 @@
 #define OSCILLOSCOPE_H
 
 #include <QWidget>
-#include "dataprocessor.h"
-#include "screen.h"
-#include "datainterface.h"
+#include "nonmoveable.h"
 
-class Oscilloscope : public QWidget
+class DataProcessor;
+class Screen;
+class DataInterface;
+
+class Oscilloscope final : public QWidget, NonMoveable<Oscilloscope>
 {
     Q_OBJECT
 
@@ -15,8 +17,8 @@ public:
     ~Oscilloscope();
 
 private:
-    DataProcessor processor;
-    Screen screen;
-    DataInterface *dataInterface;
+    Screen* screen;
+    DataProcessor* processor;
+    DataInterface* dataInterface;
 };
 #endif // OSCILLOSCOPE_H

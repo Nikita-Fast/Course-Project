@@ -18,6 +18,7 @@ SOURCES += \
 HEADERS += \
     datainterface.h \
     dataprocessor.h \
+    nonmoveable.h \
     oscilloscope.h \
     screen.h \
     udpinterface.h
