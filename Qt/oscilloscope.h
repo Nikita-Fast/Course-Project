@@ -13,7 +13,7 @@ class Oscilloscope final : public QWidget, NonMoveable<Oscilloscope>
     Q_OBJECT
 
 public:
-    Oscilloscope(QWidget *parent = nullptr);
+    explicit Oscilloscope(QWidget *parent = nullptr);
     ~Oscilloscope();
 
 private:
