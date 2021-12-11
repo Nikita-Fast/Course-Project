@@ -39,10 +39,11 @@ protected:
 private:
     void drawGrid();
     void convertBufferToPoints(QPoint *points);
-
-    static const int screen_buffer_size = 6400;
-    const int width_pixels = 700;
-    const int height_pixels = 500;
+    enum {
+        screen_buffer_size = 6400,
+        width_pixels = 700,
+        height_pixels = 500
+    };
 
     short screenBuffer[screen_buffer_size];
     QTimer *bufferTimer;
