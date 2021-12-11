@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "nonmoveable.h"
+#include <array>
 
 class Screen final : public QWidget, private NonMoveable<Screen>
 {
@@ -45,7 +46,7 @@ private:
         height_pixels = 500
     };
 
-    short screenBuffer[screen_buffer_size];
+    std::array<short, screen_buffer_size> screenBuffer;
     QTimer *bufferTimer;
 
 

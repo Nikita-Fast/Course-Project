@@ -4,7 +4,7 @@
 #include "QtDebug"
 #include "cmath"
 
-Screen::Screen(QWidget *parent) : QWidget(parent)
+Screen::Screen(QWidget *parent) : QWidget(parent), screenBuffer({0})
 {
     setFixedSize(width_pixels, height_pixels);
 
@@ -28,8 +28,8 @@ void Screen::updateScreen()
 
 void Screen::updateScreenBuffer(short *ptrToValues, int amount)
 {
-    memmove(screenBuffer, screenBuffer + amount, sizeof(short) * (screen_buffer_size - amount));
-    memcpy(&screenBuffer[screen_buffer_size - amount], ptrToValues,  sizeof(short) * amount);
+    std::move(screenBuffer.begin() + amount, screenBuffer.begin() + screen_buffer_size, screenBuffer.begin());
+    std::copy(ptrToValues, ptrToValues + amount, screenBuffer.data() + screen_buffer_size - amount);
 }
 
 void Screen::askForData()
