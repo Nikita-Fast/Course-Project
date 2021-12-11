@@ -8,7 +8,7 @@ class DataProcessor;
 class Screen;
 class DataInterface;
 
-class Oscilloscope final : public QWidget, NonMoveable<Oscilloscope>
+class Oscilloscope final : public QWidget, private NonMoveable<Oscilloscope>
 {
     Q_OBJECT
 

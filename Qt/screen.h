@@ -1,10 +1,10 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
-#include <QObject>
 #include <QWidget>
+#include "nonmoveable.h"
 
-class Screen : public QWidget
+class Screen final : public QWidget, private NonMoveable<Screen>
 {
     Q_OBJECT
 public:
