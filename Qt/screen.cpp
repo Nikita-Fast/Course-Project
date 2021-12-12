@@ -6,6 +6,8 @@
 
 Screen::Screen(QWidget *parent) : QWidget(parent), screenBuffer({0})
 {
+    // TODO: экран должен менять свои размеры. Можно задаться минимальным размером (если точек на экране (пикселей) меньше чем нужно отобразить,
+    // то в этом случае нужно делать децимацию)
     setFixedSize(width_pixels, height_pixels);
 
     QPalette pal = QPalette();
@@ -13,10 +15,12 @@ Screen::Screen(QWidget *parent) : QWidget(parent), screenBuffer({0})
     setAutoFillBackground(true);
     setPalette(pal);
 
+    // TODO: объект динамически создается, но не удаляется. Зачем здесь динамическое создание?
     QTimer *screenTimer = new QTimer(this);
     connect(screenTimer, SIGNAL(timeout()), this, SLOT(updateScreen()));
     screenTimer->start(screenTimerPeriod);
 
+    // TODO: объект динамически создается, но не удаляется. Зачем здесь динамическое создание?
     bufferTimer = new QTimer(this);
     connect(bufferTimer, SIGNAL(timeout()), this, SLOT(askForData()));
 }
@@ -28,12 +32,14 @@ void Screen::updateScreen()
 
 void Screen::updateScreenBuffer(short *ptrToValues, int amount)
 {
+    // TODO: сдвиг  памяти - это медленный процесс. При большом размере буфера приведет к неработоспособности ПО. Лучше использовать циклический буфер
     std::move(screenBuffer.begin() + amount, screenBuffer.begin() + screen_buffer_size, screenBuffer.begin());
     std::copy(ptrToValues, ptrToValues + amount, screenBuffer.data() + screen_buffer_size - amount);
 }
 
 void Screen::askForData()
 {
+    // TODO: не нужная пересылка сигнал слотов
     emit(getNewValues(valuesToAsk));
 }
 
@@ -128,6 +134,7 @@ void Screen::stopBufferTimer()
 void Screen::paintEvent(QPaintEvent *)
 {
     int pointsNumber = std::min(width(), rendered_part_samples_length);
+    // TODO: делать массивы в стеке это грех.
     QPoint points[pointsNumber];
 
     convertBufferToPoints(points);
@@ -148,6 +155,7 @@ void Screen::convertBufferToPoints(QPoint *points)
         for (int i = 0; i < rendered_part_samples_length; i++) {
             int x = round(i * step);
             //страшно ли переполнение y?; при большом масштабе по у scale_y стремится к нулю, y -> бесконечности
+            // TODO: конечно могут быть переполнения. У тебя scale должен быть ограничен (очевидно, что если у тебя размах по y превышает шаг квантования, то нет смысла увеличивать)
             int y = pivot_y - screenBuffer[rendered_part_start + i] / scale_y;
             points[i] = QPoint(x, y);
         }
