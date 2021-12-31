@@ -49,7 +49,7 @@ Oscilloscope::Oscilloscope(QWidget *parent)
     setLayout(main_layout);
 
     connect(dataInterface, SIGNAL(packetSent(short *, int)), processor, SLOT(storePacket(short *, int)));
-    connect(screen, SIGNAL(getNewValues(int)), processor, SLOT(sendDataToScreen(int)));
+    //connect(screen, SIGNAL(getNewValues(int)), processor, SLOT(sendDataToScreen(int)));
     connect(processor, SIGNAL(sendSamples(short*, int)), screen, SLOT(updateScreenBuffer(short*, int)));
 
     connect(inc_scale_y_btn, SIGNAL(clicked()), screen, SLOT(increaseScaleY()));
@@ -62,8 +62,8 @@ Oscilloscope::Oscilloscope(QWidget *parent)
     connect(down_shift_btn, SIGNAL(clicked()), screen, SLOT(shiftDown()));
     connect(screen, SIGNAL(yScaleChanged(QString)), scale_y_label, SLOT(setText(QString)));
     connect(screen, SIGNAL(xScaleChanged(QString)), scale_x_label, SLOT(setText(QString)));
-    connect(pause_btn, SIGNAL(clicked()), screen, SLOT(stopBufferTimer()));
-    connect(start_btn, SIGNAL(clicked()), screen, SLOT(startBufferTimer()));
+    connect(pause_btn, SIGNAL(clicked()), processor, SLOT(stopBuffTimer()));
+    connect(start_btn, SIGNAL(clicked()), processor, SLOT(startBuffTimer()));
 }
 
 Oscilloscope::~Oscilloscope()

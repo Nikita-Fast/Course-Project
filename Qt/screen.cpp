@@ -21,8 +21,8 @@ Screen::Screen(QWidget *parent) : QWidget(parent), screenBuffer({0})
     screenTimer->start(screenTimerPeriod);
 
     // TODO: объект динамически создается, но не удаляется. Зачем здесь динамическое создание?
-    bufferTimer = new QTimer(this);
-    connect(bufferTimer, SIGNAL(timeout()), this, SLOT(askForData()));
+//    bufferTimer = new QTimer(this);
+//    connect(bufferTimer, SIGNAL(timeout()), this, SLOT(askForData()));
 }
 
 void Screen::updateScreen()
@@ -45,7 +45,7 @@ void Screen::askForData()
 
 void Screen::startBufferTimer()
 {
-    bufferTimer->start(bufferTimerPeriod);
+    //bufferTimer->start(bufferTimerPeriod);
 }
 
 void Screen::increaseScaleY()
@@ -128,7 +128,7 @@ void Screen::shiftDown()
 
 void Screen::stopBufferTimer()
 {
-    bufferTimer->stop();
+    //bufferTimer->stop();
 }
 
 void Screen::paintEvent(QPaintEvent *)

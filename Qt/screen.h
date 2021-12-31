@@ -48,13 +48,13 @@ private:
     };
 
     std::array<short, screen_buffer_size> screenBuffer;
-    QTimer *bufferTimer;
+    //QTimer *bufferTimer;
 
 
     // TODO: этот параметр используется только в одном месте. Зачем делать его членом класса (да еще и не константным)
     int screenTimerPeriod = 16;
     int bufferTimerPeriod = 10;
-    int samplingRate = 64 * 6400; //делал тест на нагрузку, поэтому тут такое странное значение
+    int samplingRate = 6400; //делал тест на нагрузку, поэтому тут такое странное значение
     double sample_size_ms = 1000.0 / samplingRate;
 
     // TODO: стремная инициализация члена класса. А что если мой компилятор сначала его инициализирует, а только затем bufferTimerPeriod

@@ -3,15 +3,21 @@
 
 #include <QObject>
 
+class QTimer;
+
 class DataProcessor : public QObject
 {
     Q_OBJECT
 public:
     explicit DataProcessor(QObject *parent = nullptr);
+    ~DataProcessor();
 
 public slots:
     void storePacket(short *packet, int length);
-    void sendDataToScreen(int amount);
+    void sendDataToScreen(/*int amount*/);
+
+    void startBuffTimer();
+    void stopBuffTimer();
 
 signals:
     void sendSamples(short *ptrToValues, int amount);
@@ -21,6 +27,8 @@ private:
     short processorBuffer[buffer_size];
     int counter1 = -1; //индекс последнего сэмпла
     int counter2 = 0; //индекс сэмпла (начала группы сэмплов), который будет отправлен экрану при ближайшем запросе
+
+    QTimer *buffTimer;
 
 };
 

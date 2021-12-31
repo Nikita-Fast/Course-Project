@@ -4,7 +4,13 @@
 
 DataProcessor::DataProcessor(QObject *parent) : QObject(parent)
 {
+    buffTimer = new QTimer;
+    connect(buffTimer, SIGNAL(timeout()), this, SLOT(sendDataToScreen()));
+}
 
+DataProcessor::~DataProcessor()
+{
+    delete buffTimer;
 }
 
 void DataProcessor::storePacket(short *packet, int packet_length)
@@ -23,13 +29,23 @@ void DataProcessor::storePacket(short *packet, int packet_length)
     counter1 += packet_length;
 }
 
-void DataProcessor::sendDataToScreen(int amount)
+void DataProcessor::sendDataToScreen(/*int amount*/)
 {
     int rest = buffer_size - counter2;
     if (rest < 0) {
         rest = 0;
     }
-    int samplesToSend = std::min(rest, amount);
+    int samplesToSend = std::min(rest, /*amount*/64);
     emit(sendSamples(&processorBuffer[counter2], samplesToSend));
     counter2 += samplesToSend;
+}
+
+void DataProcessor::startBuffTimer()
+{
+    buffTimer->start(10);
+}
+
+void DataProcessor::stopBuffTimer()
+{
+    buffTimer->stop();
 }
