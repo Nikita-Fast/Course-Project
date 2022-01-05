@@ -1,51 +1,63 @@
 #include "dataprocessor.h"
 #include "QtDebug"
 #include <QTimer>
+#include "StrictRingBuffer.h"
+#include "worker.h"
 
 DataProcessor::DataProcessor(QObject *parent) : QObject(parent)
 {
-    buffTimer = new QTimer;
-    connect(buffTimer, SIGNAL(timeout()), this, SLOT(sendDataToScreen()));
+//    buffTimer = new QTimer;
+//    connect(buffTimer, SIGNAL(timeout()), this, SLOT(sendDataToScreen()));
+    buffer = new StrictRingBuffer(buffer_size);
+
+    Worker *worker = new Worker(frame_size);
+    worker->moveToThread(&workerThread);
+
+    connect(this, SIGNAL(frameReadyForProcessing(StrictRingBuffer *)), worker, SLOT(processFrame(StrictRingBuffer *)));
+    connect(worker, SIGNAL(frameProcessed(short *)), this, SLOT(receiveProcessedFrame(short *)));
+    connect(&workerThread, SIGNAL(finished()), worker, SLOT(deleteLater()));
+
+    workerThread.start();
 }
 
 DataProcessor::~DataProcessor()
 {
-    delete buffTimer;
+    //delete buffTimer;
 }
 
-void DataProcessor::storePacket(short *packet, int packet_length)
+
+void DataProcessor::writePacketToBuf(short *packet, int length)
 {
-    int free = buffer_size - (counter1 + 1);
-    //освободить место для пришедшего пакета
-    if (packet_length > free) {
-        int shift = packet_length - free;
-        memmove(processorBuffer, processorBuffer + shift, (buffer_size - shift) * sizeof(short));
-        counter1 -= shift;
-        //не даём counter2 стать отрицательным, так мы теряем данные, но это так и должно быть
-        counter2 = counter2 <= shift ? 0 : counter2 - shift;
+    //qDebug() << QThread::currentThread() << " writePacketToBuf()";
+    buffer->write(packet, length);
+    qDebug() << buffer->getElementsCount();
+
+    if (frameIsReady() && !frameIsCurrentlyProcessing) {
+        frameIsCurrentlyProcessing = true;
+        //qDebug() << "frame ready";
+        emit(frameReadyForProcessing(buffer));
     }
-    //скопировать пакет в буфер
-    memcpy(processorBuffer + counter1 + 1, packet, packet_length * sizeof(short));
-    counter1 += packet_length;
 }
 
-void DataProcessor::sendDataToScreen(/*int amount*/)
+void DataProcessor::receiveProcessedFrame(short *frame)
 {
-    int rest = buffer_size - counter2;
-    if (rest < 0) {
-        rest = 0;
+
+    frameIsCurrentlyProcessing = false;
+    //qDebug() << QThread::currentThread() << " DataProcessor::receiveProcessedFrame";
+    //заход на обработку следующего фрейма, по идее здесь queued connection и ждать срабатывания слота в worker не надо
+    //поэтому тратится времени немного
+    if (frameIsReady() && !frameIsCurrentlyProcessing) {
+        frameIsCurrentlyProcessing = true;
+        emit(frameReadyForProcessing(buffer));
     }
-    int samplesToSend = std::min(rest, /*amount*/64);
-    emit(sendSamples(&processorBuffer[counter2], samplesToSend));
-    counter2 += samplesToSend;
+
+    emit(sendFrameToScreen(frame, frame_size));
 }
 
-void DataProcessor::startBuffTimer()
+bool DataProcessor::frameIsReady()
 {
-    buffTimer->start(10);
-}
-
-void DataProcessor::stopBuffTimer()
-{
-    buffTimer->stop();
+    if (buffer->getElementsCount() >= frame_size) {
+        return true;
+    }
+    return false;
 }

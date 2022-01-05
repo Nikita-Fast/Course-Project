@@ -2,8 +2,10 @@
 #define DATAPROCESSOR_H
 
 #include <QObject>
+#include <QThread>
 
 class QTimer;
+class StrictRingBuffer;
 
 class DataProcessor : public QObject
 {
@@ -13,23 +15,36 @@ public:
     ~DataProcessor();
 
 public slots:
-    void storePacket(short *packet, int length);
-    void sendDataToScreen(/*int amount*/);
+//    void storePacket(short *packet, int length);
+//    void sendDataToScreen(/*int amount*/);
 
-    void startBuffTimer();
-    void stopBuffTimer();
+//    void startBuffTimer();
+//    void stopBuffTimer();
+
+    void writePacketToBuf(short *packet, int length);
+    void receiveProcessedFrame(short *frame);
 
 signals:
-    void sendSamples(short *ptrToValues, int amount);
+    //void sendSamples(short *ptrToValues, int amount);
+    /*
+по этому сигналу хочу запустить cycle и соответствующий slot должен работать в другом потоке.
+слот обработает фрейм, а потом отправляет его в буфер экрана*/
+    void frameReadyForProcessing(StrictRingBuffer *buffer);
+    void sendFrameToScreen(short *frame, int frame_size);
 
 private:
-    static const int buffer_size = 12800;
-    short processorBuffer[buffer_size];
-    int counter1 = -1; //индекс последнего сэмпла
-    int counter2 = 0; //индекс сэмпла (начала группы сэмплов), который будет отправлен экрану при ближайшем запросе
+    static const int buffer_size = 16384;
+    static const int frame_size = 512;
 
-    QTimer *buffTimer;
+    StrictRingBuffer *buffer;
+    QThread workerThread;
+
+    bool frameIsReady();
+    bool frameIsCurrentlyProcessing = false;
 
 };
+
+
+
 
 #endif // DATAPROCESSOR_H

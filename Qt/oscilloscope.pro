@@ -13,15 +13,19 @@ SOURCES += \
     main.cpp \
     oscilloscope.cpp \
     screen.cpp \
-    udpinterface.cpp
+    udpinterface.cpp \
+    worker.cpp
 
 HEADERS += \
+    StrictRingBuffer.h \
     datainterface.h \
     dataprocessor.h \
     nonmoveable.h \
     oscilloscope.h \
+    ringbuffer.h \
     screen.h \
-    udpinterface.h
+    udpinterface.h \
+    worker.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -1,5 +1,7 @@
 #include "udpinterface.h"
 #include "QtDebug"
+#include <QThread>
+#define PRINT (qDebug() << QThread::currentThread())
 
 UdpInterface::UdpInterface()
 {
@@ -17,7 +19,7 @@ void UdpInterface::sendDataToOscilloscope()
 
         short samples[packet.size() / 2];
         packetToArray(packet, samples);
-
+        //PRINT;
         emit(packetSent(samples, packet.size() / 2));
 
     }

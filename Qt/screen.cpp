@@ -3,8 +3,10 @@
 #include "qpainter.h"
 #include "QtDebug"
 #include "cmath"
+#include "ringbuffer.h"
+#include <QThread>
 
-Screen::Screen(QWidget *parent) : QWidget(parent), screenBuffer({0})
+Screen::Screen(QWidget *parent) : QWidget(parent)
 {
     // TODO: экран должен менять свои размеры. Можно задаться минимальным размером (если точек на экране (пикселей) меньше чем нужно отобразить,
     // то в этом случае нужно делать децимацию)
@@ -20,32 +22,30 @@ Screen::Screen(QWidget *parent) : QWidget(parent), screenBuffer({0})
     connect(screenTimer, SIGNAL(timeout()), this, SLOT(updateScreen()));
     screenTimer->start(screenTimerPeriod);
 
+    ring_buffer.setOffset(rendered_part_start);
+    int v = -32000;
+   for (int i = 0; i < screen_buffer_size; i++) {
+       ring_buffer.set(v, i);
+       v += 32000 / (screen_buffer_size / 2);
+     }
+
     // TODO: объект динамически создается, но не удаляется. Зачем здесь динамическое создание?
 //    bufferTimer = new QTimer(this);
 //    connect(bufferTimer, SIGNAL(timeout()), this, SLOT(askForData()));
 }
 
+
+void Screen::receiveFrame(short *frame, int frame_size)
+{
+    for (int i = 0; i < frame_size; i++) {
+        ring_buffer.put(*(frame + i));
+    }
+    delete frame;
+}
+
 void Screen::updateScreen()
 {
     update();
-}
-
-void Screen::updateScreenBuffer(short *ptrToValues, int amount)
-{
-    // TODO: сдвиг  памяти - это медленный процесс. При большом размере буфера приведет к неработоспособности ПО. Лучше использовать циклический буфер
-    std::move(screenBuffer.begin() + amount, screenBuffer.begin() + screen_buffer_size, screenBuffer.begin());
-    std::copy(ptrToValues, ptrToValues + amount, screenBuffer.data() + screen_buffer_size - amount);
-}
-
-void Screen::askForData()
-{
-    // TODO: не нужная пересылка сигнал слотов
-    emit(getNewValues(valuesToAsk));
-}
-
-void Screen::startBufferTimer()
-{
-    //bufferTimer->start(bufferTimerPeriod);
 }
 
 void Screen::increaseScaleY()
@@ -66,6 +66,7 @@ void Screen::increaseScaleX()
     int left = decrease / 2;
     rendered_part_start += left;
     rendered_part_samples_length -= decrease;
+    ring_buffer.setOffset(rendered_part_start);
     emit(xScaleChanged(QString("x = ") +
                        QString::number(rendered_part_samples_length / grid_horizontal_segments * sample_size_ms) + QString(" ms")));
 }
@@ -99,6 +100,9 @@ void Screen::decreaseScaleX()
             rendered_part_samples_length -= shift;
         }
     }
+    ring_buffer.setOffset(rendered_part_start);
+    //qDebug() << rendered_part_start << ", " << rendered_part_samples_length;
+
     emit(xScaleChanged(QString("x = ") +
                        QString::number(rendered_part_samples_length / grid_horizontal_segments * sample_size_ms) + QString(" ms")));
 }
@@ -107,6 +111,8 @@ void Screen::shiftToLeft()
 {
     int shift = rendered_part_samples_length / 10;
     rendered_part_start = rendered_part_start <= shift ? 0 : rendered_part_start - shift;
+    ring_buffer.setOffset(rendered_part_start);
+    //qDebug() << rendered_part_start;
 }
 
 void Screen::shiftToRight()
@@ -114,6 +120,8 @@ void Screen::shiftToRight()
     int shift = rendered_part_samples_length / 10;
     int offset = screen_buffer_size - (rendered_part_start + rendered_part_samples_length);
     rendered_part_start += std::min(offset, shift);
+    ring_buffer.setOffset(rendered_part_start);
+    //qDebug() << rendered_part_start;
 }
 
 void Screen::shiftUp()
@@ -124,11 +132,6 @@ void Screen::shiftUp()
 void Screen::shiftDown()
 {
     pivot_y -= vertical_shift_magnitude;
-}
-
-void Screen::stopBufferTimer()
-{
-    //bufferTimer->stop();
 }
 
 void Screen::paintEvent(QPaintEvent *)
@@ -156,7 +159,10 @@ void Screen::convertBufferToPoints(QPoint *points)
             int x = round(i * step);
             //страшно ли переполнение y?; при большом масштабе по у scale_y стремится к нулю, y -> бесконечности
             // TODO: конечно могут быть переполнения. У тебя scale должен быть ограничен (очевидно, что если у тебя размах по y превышает шаг квантования, то нет смысла увеличивать)
-            int y = pivot_y - screenBuffer[rendered_part_start + i] / scale_y;
+            //int y = pivot_y - screenBuffer[rendered_part_start + i] / scale_y;
+
+            int y = pivot_y - ring_buffer.get(i) / scale_y;
+
             points[i] = QPoint(x, y);
         }
     }
@@ -164,7 +170,10 @@ void Screen::convertBufferToPoints(QPoint *points)
         double step = (double)rendered_part_samples_length / width();
         for (int i = 0; i < width(); i++) {
             int x = i;
-            int y = pivot_y - screenBuffer[(int)(rendered_part_start + floor(i * step))] / scale_y;
+            //int y = pivot_y - screenBuffer[(int)(rendered_part_start + floor(i * step))] / scale_y;
+
+            int y = pivot_y - ring_buffer.get(floor(i * step)) / scale_y;
+
             points[i] = QPoint(x, y);
         }
     }

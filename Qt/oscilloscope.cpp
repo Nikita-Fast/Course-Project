@@ -48,9 +48,14 @@ Oscilloscope::Oscilloscope(QWidget *parent)
     main_layout->addLayout(btns_lbls_layout);
     setLayout(main_layout);
 
-    connect(dataInterface, SIGNAL(packetSent(short *, int)), processor, SLOT(storePacket(short *, int)));
+    //connect(dataInterface, SIGNAL(packetSent(short *, int)), processor, SLOT(storePacket(short *, int)));
     //connect(screen, SIGNAL(getNewValues(int)), processor, SLOT(sendDataToScreen(int)));
-    connect(processor, SIGNAL(sendSamples(short*, int)), screen, SLOT(updateScreenBuffer(short*, int)));
+    //connect(processor, SIGNAL(sendSamples(short*, int)), screen, SLOT(updateScreenBuffer(short*, int)));
+    //connect(dataInterface, SIGNAL(packetSent(short *, int)), screen, SLOT(storePacket(short *, int)));
+
+    connect(dataInterface, SIGNAL(packetSent(short *, int)), processor, SLOT(writePacketToBuf(short *, int)));
+    //sendFrameToScreen(short *, int)
+    connect(processor, SIGNAL(sendFrameToScreen(short *, int)), screen, SLOT(receiveFrame(short *, int)));
 
     connect(inc_scale_y_btn, SIGNAL(clicked()), screen, SLOT(increaseScaleY()));
     connect(dec_scale_y_btn, SIGNAL(clicked()), screen, SLOT(decreaseScaleY()));
