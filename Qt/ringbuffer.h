@@ -8,9 +8,7 @@ template<typename T, int capacity>
 class RingBuffer
 {
 public:
-    RingBuffer() {
-
-    }
+    RingBuffer() = default;
 
     T get(int index) {
         return buf[(head + offset + index) % capacity];
@@ -25,14 +23,6 @@ public:
         offset = value;
     }
 
-    void print() {
-        QString str;
-        for (int i = 0; i < capacity; i++) {
-            str.append(QString::number(buf[i])).append(' ');
-        }
-        qDebug() << str;
-    }
-
     void set(T value, int index) {
         buf[index] = value;
     }
@@ -43,6 +33,14 @@ public:
 
     int getOldest() {
         return (head + 1) % capacity;
+    }
+
+    void print() {
+        QString str;
+        for (int i = 0; i < capacity; i++) {
+            str.append(QString::number(buf[i])).append(' ');
+        }
+        qDebug() << str;
     }
 
 private:

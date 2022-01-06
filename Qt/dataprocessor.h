@@ -15,20 +15,11 @@ public:
     ~DataProcessor();
 
 public slots:
-//    void storePacket(short *packet, int length);
-//    void sendDataToScreen(/*int amount*/);
-
-//    void startBuffTimer();
-//    void stopBuffTimer();
 
     void writePacketToBuf(short *packet, int length);
     void receiveProcessedFrame(short *frame);
 
 signals:
-    //void sendSamples(short *ptrToValues, int amount);
-    /*
-по этому сигналу хочу запустить cycle и соответствующий slot должен работать в другом потоке.
-слот обработает фрейм, а потом отправляет его в буфер экрана*/
     void frameReadyForProcessing(StrictRingBuffer *buffer);
     void sendFrameToScreen(short *frame, int frame_size);
 
@@ -41,6 +32,7 @@ private:
 
     bool frameIsReady();
     bool frameIsCurrentlyProcessing = false;
+    void tryProcessFrame();
 
 };
 

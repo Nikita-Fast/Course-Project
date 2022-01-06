@@ -65,6 +65,7 @@ public class UDPSender {
                             int packetNumber = numberOfPacketsToBeSent - (int) remainingTimerIterations.getCount();
                             double startTimeForPacket = (double) packetNumber / PACKETS_FOR_ONE_SEC_OF_SIGNAL;
                             short[] samples = SignalGenerator.getSamplesOfSineSignal(startTimeForPacket);
+
                             packet = SignalGenerator.putSamplesToPacket(samples);
 
                             DatagramPacket outgoing = new DatagramPacket(packet, PACKET_SIZE, inetAddress, SERVICE_PORT);

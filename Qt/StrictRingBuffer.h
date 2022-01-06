@@ -16,16 +16,16 @@ public:
         delete buf;
     }
 
-    void write(short value) {
-        if (isFull()) {
-            qDebug() << "can't write values to a full buffer";
-        }
-        else {
-            buf[w_index] = value;
-            w_index = (w_index + 1) % capacity;
-            el_cnt++; //mutex?
-        }
-    }
+//    void write(short value) {
+//        if (isFull()) {
+//            qDebug() << "can't write values to a full buffer";
+//        }
+//        else {
+//            buf[w_index] = value;
+//            w_index = (w_index + 1) % capacity;
+//            el_cnt++; //mutex?
+//        }
+//    }
 
     void write(short *samples, int cnt) {
         if (capacity - getElementsCount() >= cnt) {
@@ -46,15 +46,36 @@ public:
         }
     }
 
-    short read() {
-        if (isEmpty()) {
-            qDebug() << "can't read from empty buffer";
+//    short read() {
+//        if (isEmpty()) {
+//            qDebug() << "can't read from empty buffer";
+//        }
+//        else {
+//            short value = buf[r_index];
+//            r_index = (r_index + 1) % capacity;
+//            el_cnt--;
+//            return value;
+//        }
+//    }
+
+    void read(short *dst, int cnt) {
+        if (getElementsCount() < cnt) {
+            qDebug() << "not enough values in buffer";
         }
         else {
-            short value = buf[r_index];
-            r_index = (r_index + 1) % capacity;
-            el_cnt--;
-            return value;
+            int toEnd = capacity - r_index;
+            int n = std::min(toEnd, cnt);
+
+            std::copy(buf + r_index, buf + r_index + n, dst);
+
+            r_index = (r_index + n) % capacity;
+
+            if (n < cnt) {
+                int k = cnt - n;
+                std::copy(buf + r_index, buf + r_index + k, dst + n);
+                r_index = (r_index + k) % capacity;
+            }
+            el_cnt -= cnt;
         }
     }
 
@@ -72,7 +93,7 @@ public:
 
 
 private:
-    int capacity = 0;
+    int capacity;
     short *buf;
     int w_index = 0;
     int r_index = 0;

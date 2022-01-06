@@ -11,18 +11,21 @@ void Worker::processFrame(StrictRingBuffer *buf)
 {
     //qDebug() << QThread::currentThread() << " Worker::processFrame";
     short *frame = new short[frame_size];
-    for (int i = 0; i < frame_size; i++) {
-        frame[i] = buf->read();
-    }
+    buf->read(frame, frame_size);
 
     //processing
+    processingFunction1(frame);
+
+    //send to screen
+    //кто освобождает память? Пусть пока это будет Screen::receiveFrame
+    emit(frameProcessed(frame));
+}
+
+void Worker::processingFunction1(short *frame)
+{
     for (int i = 0; i < frame_size; i++) {
         if (frame[i] > 15000) {
             frame[i] = 15000;
         }
     }
-
-    //send to screen
-    //кто освобождает память? Пусть пока это будет Screen::receiveFrame
-    emit(frameProcessed(frame));
 }

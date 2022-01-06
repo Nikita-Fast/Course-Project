@@ -19,6 +19,8 @@ public slots:
 
 private:
     int frame_size;
+
+    void processingFunction1(short *frame);
 };
 
 #endif // WORKER_H

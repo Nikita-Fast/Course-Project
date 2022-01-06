@@ -48,13 +48,7 @@ Oscilloscope::Oscilloscope(QWidget *parent)
     main_layout->addLayout(btns_lbls_layout);
     setLayout(main_layout);
 
-    //connect(dataInterface, SIGNAL(packetSent(short *, int)), processor, SLOT(storePacket(short *, int)));
-    //connect(screen, SIGNAL(getNewValues(int)), processor, SLOT(sendDataToScreen(int)));
-    //connect(processor, SIGNAL(sendSamples(short*, int)), screen, SLOT(updateScreenBuffer(short*, int)));
-    //connect(dataInterface, SIGNAL(packetSent(short *, int)), screen, SLOT(storePacket(short *, int)));
-
     connect(dataInterface, SIGNAL(packetSent(short *, int)), processor, SLOT(writePacketToBuf(short *, int)));
-    //sendFrameToScreen(short *, int)
     connect(processor, SIGNAL(sendFrameToScreen(short *, int)), screen, SLOT(receiveFrame(short *, int)));
 
     connect(inc_scale_y_btn, SIGNAL(clicked()), screen, SLOT(increaseScaleY()));
@@ -67,8 +61,8 @@ Oscilloscope::Oscilloscope(QWidget *parent)
     connect(down_shift_btn, SIGNAL(clicked()), screen, SLOT(shiftDown()));
     connect(screen, SIGNAL(yScaleChanged(QString)), scale_y_label, SLOT(setText(QString)));
     connect(screen, SIGNAL(xScaleChanged(QString)), scale_x_label, SLOT(setText(QString)));
-    connect(pause_btn, SIGNAL(clicked()), processor, SLOT(stopBuffTimer()));
-    connect(start_btn, SIGNAL(clicked()), processor, SLOT(startBuffTimer()));
+    connect(pause_btn, SIGNAL(clicked()), screen, SLOT(setIsPausedToTrue()));
+    connect(start_btn, SIGNAL(clicked()), screen, SLOT(setIsPausedToFalse()));
 }
 
 Oscilloscope::~Oscilloscope()
