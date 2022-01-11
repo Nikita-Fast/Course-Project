@@ -70,7 +70,4 @@ Oscilloscope::Oscilloscope(QWidget *parent)
 
 Oscilloscope::~Oscilloscope()
 {
-    delete dataInterface;
-    delete processor;
-    delete screen;
 }
