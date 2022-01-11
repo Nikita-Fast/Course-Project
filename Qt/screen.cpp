@@ -3,7 +3,7 @@
 #include "qpainter.h"
 #include "QtDebug"
 #include "cmath"
-#include "ringbuffer.h"
+#include "ringbuffer.h"// TODO: лишний инклюд
 #include <QThread>
 
 
@@ -11,7 +11,7 @@ Screen::Screen(QWidget *parent) : QWidget(parent)
 {
     // TODO: экран должен менять свои размеры. Можно задаться минимальным размером (если точек на экране (пикселей) меньше чем нужно отобразить,
     // то в этом случае нужно делать децимацию)
-    setFixedSize(width_pixels, height_pixels);
+    //setFixedSize(width_pixels, height_pixels);
 
     QPalette pal = QPalette();
     pal.setColor(QPalette::Window, Qt::black);

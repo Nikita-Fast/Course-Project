@@ -2,7 +2,7 @@
 #define SCREEN_H
 
 #include <QWidget>
-#include <array>
+//#include <array> // TODO: лишний инклюд
 #include "nonmoveable.h"
 #include "ringbuffer.h"
 

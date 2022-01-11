@@ -7,15 +7,17 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QLabel>
+#include <QGroupBox>
+#include <QDockWidget>
 
 Oscilloscope::Oscilloscope(QWidget *parent)
-    : QWidget(parent),
+    : QMainWindow(parent),
       screen(new Screen(this)),
       processor(new DataProcessor()),
       dataInterface(new UdpInterface)
 {
-    QVBoxLayout *btns_lbls_layout = new QVBoxLayout;
-
+    QGroupBox* control_group = new QGroupBox("Панель управления", this);
+    QVBoxLayout *btns_lbls_layout = new QVBoxLayout(control_group);
     QPushButton *inc_scale_y_btn = new QPushButton("scale_y++");
     QPushButton *dec_scale_y_btn = new QPushButton("scale_y--");
     QPushButton *left_shift_btn = new QPushButton("left_shift");
@@ -29,7 +31,7 @@ Oscilloscope::Oscilloscope(QWidget *parent)
     QLabel *scale_y_label = new QLabel("y: 15000");
     QLabel *scale_x_label = new QLabel("x: ");
 
-    inc_scale_y_btn->setFixedWidth(150);
+    //inc_scale_y_btn->setFixedWidth(150);
     btns_lbls_layout->addWidget(inc_scale_x_btn);
     btns_lbls_layout->addWidget(dec_scale_x_btn);
     btns_lbls_layout->addWidget(inc_scale_y_btn);
@@ -43,10 +45,11 @@ Oscilloscope::Oscilloscope(QWidget *parent)
     btns_lbls_layout->addWidget(scale_y_label);
     btns_lbls_layout->addWidget(scale_x_label);
 
-    QHBoxLayout *main_layout = new QHBoxLayout;
-    main_layout->addWidget(screen);
-    main_layout->addLayout(btns_lbls_layout);
-    setLayout(main_layout);
+    setCentralWidget(screen);
+
+    QDockWidget* panel = new QDockWidget(this);
+    panel->setWidget(control_group);
+    addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, panel);
 
     connect(dataInterface, SIGNAL(packetSent(short *, int)), processor, SLOT(writePacketToBuf(short *, int)));
     connect(processor, SIGNAL(sendFrameToScreen(short *, int)), screen, SLOT(receiveFrame(short *, int)));

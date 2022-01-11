@@ -1,14 +1,14 @@
 #ifndef OSCILLOSCOPE_H
 #define OSCILLOSCOPE_H
 
-#include <QWidget>
+#include <QMainWindow>
 #include "nonmoveable.h"
 
 class DataProcessor;
 class Screen;
 class DataInterface;
 
-class Oscilloscope final : public QWidget, private NonMoveable<Oscilloscope>
+class Oscilloscope final : public QMainWindow, private NonMoveable<Oscilloscope>
 {
     Q_OBJECT
 
