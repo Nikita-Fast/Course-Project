@@ -7,6 +7,7 @@
 class QTimer;
 class StrictRingBuffer;
 
+// TODO: класс должен принимать данные из интерфейса, поступающие на частоте дискретизации А и передискретизировать их в частоту экрана В
 class DataProcessor : public QObject
 {
     Q_OBJECT

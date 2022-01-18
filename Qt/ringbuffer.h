@@ -19,18 +19,18 @@ public:
         head = (head + 1) % capacity;
     }
 
+    // TODO: плохой метод
     void setOffset(int value) {
         offset = value;
     }
-
+    // TODO: плохой метод
     void set(T value, int index) {
         buf[index] = value;
     }
-
+    // TODO: плохой метод
     int getHead() {
         return head;
     }
-
     int getOldest() {
         return (head + 1) % capacity;
     }

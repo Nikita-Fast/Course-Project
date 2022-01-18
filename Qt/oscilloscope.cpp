@@ -14,7 +14,7 @@ Oscilloscope::Oscilloscope(QWidget *parent)
     : QMainWindow(parent),
       screen(new Screen(this)),
       processor(new DataProcessor()),
-      dataInterface(new UdpInterface)
+      dataInterface(new UdpInterface) // TODO: это внешний интерфейс
 {
     QGroupBox* control_group = new QGroupBox("Панель управления", this);
     QVBoxLayout *btns_lbls_layout = new QVBoxLayout(control_group);
