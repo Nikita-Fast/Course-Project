@@ -14,12 +14,18 @@ class StrictRingBuffer {
 
   void write(short value) {
     if (isFull()) {
-      //      qDebug() << "can't write values to a full buffer";
+      qDebug() << "can't write values to a full buffer";
     } else {
       buf[w_index] = value;
       w_index = (w_index + 1) % capacity;
-      el_cnt++;  // mutex?
+      el_cnt++;
     }
+  }
+
+  void write_or_rewrite(short value) {
+    buf[w_index] = value;
+    w_index = (w_index + 1) % capacity;
+    el_cnt++;
   }
 
   void write(short* samples, int cnt) {
@@ -73,11 +79,16 @@ class StrictRingBuffer {
     }
   }
 
+  short peekAt(int n) { return buf[n % capacity]; }
+
   int getElementsCount() { return el_cnt; }
 
   bool isFull() { return el_cnt == capacity; }
 
   bool isEmpty() { return el_cnt == 0; }
+
+  int get_capacity() { return capacity; }
+  int get_w_index() { return w_index; }
 
  private:
   int capacity;

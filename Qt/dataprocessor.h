@@ -13,21 +13,22 @@ class DataProcessor : public QObject {
   Q_OBJECT
  public:
   explicit DataProcessor(QObject* parent = nullptr);
-  ~DataProcessor();
+  //  ~DataProcessor();
+  void setBuffer(StrictRingBuffer* buffer);
 
  public slots:
 
   void writePacketToBuf(short* packet, int length);
-  void receiveProcessedFrame(short* frame);
+  //  void receiveProcessedFrame(short* frame);
 
- signals:
-  void frameReadyForProcessing(StrictRingBuffer* buffer);
-  void sendFrameToScreen(short* frame, int frame_size);
+  // signals:
+  //  void frameReadyForProcessing(StrictRingBuffer* buffer);
+  //  void sendFrameToScreen(short* frame, int frame_size);
 
  private:
   static const int input_freq = 25000;
-  static const int oscill_freq = 25000 * 4;
-  static const int buffer_size = 16384;
+  static const int oscill_freq = 100000;
+  //  static const int buffer_size = 16384;
   static const int frame_size = 512 * 4;
 
   //  значение в последнем узле интерполяции в предыдущей итерации
@@ -35,11 +36,11 @@ class DataProcessor : public QObject {
   short decimation_offset = 0;
 
   StrictRingBuffer* buffer;
-  QThread worker_thread;
+  //  QThread worker_thread;
 
-  bool frameIsReady();
-  bool frameIsCurrentlyProcessing = false;
-  void tryProcessFrame();
+  //  bool frameIsReady();
+  //  bool frameIsCurrentlyProcessing = false;
+  //  void tryProcessFrame();
 
   /* эти методы пишут в буфер */
   void interpolate(short* base, int length, int factor);

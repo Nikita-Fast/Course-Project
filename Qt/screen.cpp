@@ -24,8 +24,8 @@ Screen::Screen(QWidget* parent) : QWidget(parent) {
       screen_timer_period);  // TODO: бага. Ты запускаешь таймер раньше чем
                              // выделяешь память под points
 
-  ring_buffer.setOffset(
-      rendered_part_start);  // TODO: Зачем делать сдвиг пустому буферу. Нужен
+  /*ring_buffer.setOffset(
+      rendered_part_start);*/  // TODO: Зачем делать сдвиг пустому буферу. Нужен
                              // ли здесь кольцевой буфер?
 
   points = new QPoint[width()];  // TODO:Почему не stl?
@@ -36,22 +36,26 @@ Screen::~Screen() {
   delete screen_timer;  // TODO: бага
 }
 
-void Screen::receiveFrame(short* frame, int frame_size) {
-  //  for (int i = 0; i < frame_size; i++) {
-  //    qDebug() << frame[i];
-  //  }
-  //  qDebug() << "<><><><><><><><><><>";
-
-  if (!isPaused) {
-    double pixel_y_size = 65536.0 / (height() * y_scale);
-    for (int i = 0; i < frame_size; i++) {
-      short sample = *(frame + i);
-      short y_pos = pivot_y - sample / pixel_y_size;
-      ring_buffer.put(y_pos);
-    }
-  }
-  delete frame;  // TODO: это зло. Ты втихоря стер массив
+void Screen::setBuffer(StrictRingBuffer* buffer) {
+  this->buffer = buffer;
 }
+
+// void Screen::receiveFrame(short* frame, int frame_size) {
+//  //  for (int i = 0; i < frame_size; i++) {
+//  //    qDebug() << frame[i];
+//  //  }
+//  //  qDebug() << "<><><><><><><><><><>";
+
+//  if (!isPaused) {
+//    double pixel_y_size = 65536.0 / (height() * y_scale);
+//    for (int i = 0; i < frame_size; i++) {
+//      short sample = *(frame + i);
+//      short y_pos = pivot_y - sample / pixel_y_size;
+//      ring_buffer.put(y_pos);
+//    }
+//  }
+//  delete frame;  // TODO: это зло. Ты втихоря стер массив
+//}
 
 void Screen::setIsPausedToTrue() {
   isPaused = true;
@@ -220,8 +224,19 @@ void Screen::convertBufferToPoints() {
   //      points[i] = QPoint(x, y);
   //    }
   //  }
+
+  int tail = buffer->get_capacity() - rendered_part_start - width() * x_scale;
+  int fst_projected = (buffer->get_w_index() - tail - width() * x_scale) %
+                      buffer->get_capacity();
+  if (fst_projected < 0) {
+    fst_projected = buffer->get_capacity() + fst_projected;
+  }
+  double pixel_y_size = 65536.0 / (height() * y_scale);
   for (int i = 0; i < width(); i++) {
-    points[i] = QPoint(i, ring_buffer.get(i * x_scale));
+    short y_pos =
+        pivot_y - buffer->peekAt(fst_projected + i * x_scale) / pixel_y_size;
+    points[i] = QPoint(i, y_pos);
+    //    points[i] = QPoint(i, ring_buffer.get(i * x_scale));
   }
 }
 

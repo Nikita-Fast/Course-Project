@@ -7,18 +7,21 @@
 class DataProcessor;
 class Screen;
 class DataInterface;
+class StrictRingBuffer;
 
-class Oscilloscope final : public QMainWindow, private NonMoveable<Oscilloscope>
-{
-    Q_OBJECT
+class Oscilloscope final : public QMainWindow,
+                           private NonMoveable<Oscilloscope> {
+  Q_OBJECT
 
-public:
-    explicit Oscilloscope(QWidget *parent = nullptr);
-    ~Oscilloscope();
+ public:
+  explicit Oscilloscope(QWidget* parent = nullptr);
+  ~Oscilloscope();
+  static const int BUFFER_SIZE = 16384;
 
-private:
-    Screen* screen;
-    DataProcessor* processor;
-    DataInterface* dataInterface;
+ private:
+  Screen* screen;
+  DataProcessor* processor;
+  DataInterface* dataInterface;
+  StrictRingBuffer* buffer;
 };
-#endif // OSCILLOSCOPE_H
+#endif  // OSCILLOSCOPE_H
