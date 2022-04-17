@@ -18,7 +18,7 @@ Oscilloscope::Oscilloscope(QWidget* parent)
       dataInterface(new UdpInterface)  // TODO: это внешний интерфейс
 {
   buffer = new StrictRingBuffer(BUFFER_SIZE);
-  screen->setBuffer(buffer);
+  screen->set_buffer(buffer);
   processor->setBuffer(buffer);
 
   QGroupBox* control_group = new QGroupBox("Панель управления", this);
@@ -69,12 +69,12 @@ Oscilloscope::Oscilloscope(QWidget* parent)
   connect(right_shift_btn, SIGNAL(clicked()), screen, SLOT(shiftToRight()));
   connect(up_shift_btn, SIGNAL(clicked()), screen, SLOT(shiftUp()));
   connect(down_shift_btn, SIGNAL(clicked()), screen, SLOT(shiftDown()));
-  connect(screen, SIGNAL(yScaleChanged(QString)), scale_y_label,
-          SLOT(setText(QString)));
-  connect(screen, SIGNAL(xScaleChanged(QString)), scale_x_label,
-          SLOT(setText(QString)));
-  connect(pause_btn, SIGNAL(clicked()), screen, SLOT(setIsPausedToTrue()));
-  connect(start_btn, SIGNAL(clicked()), screen, SLOT(setIsPausedToFalse()));
+  //  connect(screen, SIGNAL(yScaleChanged(QString)), scale_y_label,
+  //          SLOT(setText(QString)));
+  //  connect(screen, SIGNAL(xScaleChanged(QString)), scale_x_label,
+  //          SLOT(setText(QString)));
+  connect(pause_btn, SIGNAL(clicked()), processor, SLOT(set_is_paused_true()));
+  connect(start_btn, SIGNAL(clicked()), processor, SLOT(set_is_paused_false()));
 }
 
 Oscilloscope::~Oscilloscope() {

@@ -16,15 +16,9 @@ class Screen final : public QWidget, private NonMoveable<Screen> {
   explicit Screen(QWidget* parent = nullptr);
   ~Screen();
 
-  void setBuffer(StrictRingBuffer* buffer);
-
- signals:
-  void yScaleChanged(QString);  // TODO: на мой взгляд сигнатура неудачна. Зачем
-                                // этому сигналу передавать строку?
-  void xScaleChanged(QString);
+  void set_buffer(StrictRingBuffer* buffer);
 
  public slots:
-  void updateScreen();  // TODO: Зачем отдельный метод?
 
   void
   increaseScaleY();  // TODO: зачем нам изменение масштаба шагами? Почему нельзя
@@ -38,13 +32,8 @@ class Screen final : public QWidget, private NonMoveable<Screen> {
   void shiftUp();
   void shiftDown();
 
-  /*void receiveFrame(
-      short*,
-      int);*/  // TODO: экран ничего не принимает. Он отображает данные в буфере.
-             // Наверное лучше сделать метод инкапсуляции в буфер. Поему short?
-             // Нужно ли нам делать размер пакета произвольной длины?
-  void setIsPausedToTrue();  // TODO: это ай яй яй
-  void setIsPausedToFalse();
+  // Наверное лучше сделать метод инкапсуляции в буфер. Почему short?
+  // Нужно ли нам делать размер пакета произвольной длины?
 
  protected:
   void paintEvent(QPaintEvent*);
@@ -55,9 +44,9 @@ class Screen final : public QWidget, private NonMoveable<Screen> {
   void drawGrid();
   void convertBufferToPoints();
 
+  //размеры окна отрисовки в пикселях
   enum {
-    screen_buffer_size = 10000,  // TODO: что это? и почему оно 1500?
-    width_pixels = 700,          // TODO: это не используется
+    width_pixels = 700,  // TODO: это не используется
     height_pixels = 500  // TODO: что это? и почему оно 500?
   };
 
@@ -65,30 +54,15 @@ class Screen final : public QWidget, private NonMoveable<Screen> {
   QPoint* points;
   QTimer* screen_timer;
 
-  // TODO: этот параметр используется только в одном месте. Зачем делать его
-  // членом класса (да еще и не константным)
-  const int screen_timer_period = 16;
-
-  //  int sampling_rate = 64000;
-  //  double sampling_period =
-  //      1000.0 / sampling_rate;  // TODO: это период дискретизации.
-
   int y_scale = 1;
-  int x_scale = 1;
-  //    double scale_y = 150; // TODO: почему это double?
+  int x_scale = 10;
   int pivot_y = height_pixels / 2;
-  //  int rendered_part_length = screen_buffer_size / 2;
-  int rendered_part_start = 0;
-  /*screen_buffer_size / 4;*/  //начало отрисовываемой части буфера
+  int rendered_part_start = 0;  //начало отрисовываемой части буфера
 
-  const double scaling_factor_y =
-      1.25;  // TODO: почему это double? и почему 1,25?
-  const double scaling_factor_x = 1.25;
   const int grid_horizontal_segments = 7;
   const int grid_vertical_segments = 5;
-  const int vertical_shift_magnitude = height_pixels / 10;
 
-  bool isPaused = false;
+  bool is_paused = false;
 };
 
 #endif  // SCREEN_H

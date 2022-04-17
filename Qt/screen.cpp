@@ -1,10 +1,8 @@
 #include "screen.h"
-#include <QThread>
 #include <QTimer>
 #include "QtDebug"
 #include "cmath"
 #include "qpainter.h"
-#include "ringbuffer.h"  // TODO: лишний инклюд
 
 Screen::Screen(QWidget* parent) : QWidget(parent) {
   // TODO: экран должен менять свои размеры. Можно задаться минимальным размером
@@ -17,18 +15,12 @@ Screen::Screen(QWidget* parent) : QWidget(parent) {
   setAutoFillBackground(true);
   setPalette(pal);
 
+  points = new QPoint[width()];  // TODO:Почему не stl?
   screen_timer = new QTimer(this);
   connect(screen_timer, SIGNAL(timeout()), this,
-          SLOT(updateScreen()));  // TODO: bool при ретурне не контролируется
-  screen_timer->start(
-      screen_timer_period);  // TODO: бага. Ты запускаешь таймер раньше чем
-                             // выделяешь память под points
-
-  /*ring_buffer.setOffset(
-      rendered_part_start);*/  // TODO: Зачем делать сдвиг пустому буферу. Нужен
-                             // ли здесь кольцевой буфер?
-
-  points = new QPoint[width()];  // TODO:Почему не stl?
+          SLOT(update()));  // TODO: bool при ретурне не контролируется
+  screen_timer->start(16);  // TODO: бага. Ты запускаешь таймер раньше чем
+                            // выделяешь память под points
 }
 
 Screen::~Screen() {
@@ -36,154 +28,69 @@ Screen::~Screen() {
   delete screen_timer;  // TODO: бага
 }
 
-void Screen::setBuffer(StrictRingBuffer* buffer) {
+void Screen::set_buffer(StrictRingBuffer* buffer) {
   this->buffer = buffer;
 }
 
-// void Screen::receiveFrame(short* frame, int frame_size) {
-//  //  for (int i = 0; i < frame_size; i++) {
-//  //    qDebug() << frame[i];
-//  //  }
-//  //  qDebug() << "<><><><><><><><><><>";
-
-//  if (!isPaused) {
-//    double pixel_y_size = 65536.0 / (height() * y_scale);
-//    for (int i = 0; i < frame_size; i++) {
-//      short sample = *(frame + i);
-//      short y_pos = pivot_y - sample / pixel_y_size;
-//      ring_buffer.put(y_pos);
-//    }
-//  }
-//  delete frame;  // TODO: это зло. Ты втихоря стер массив
-//}
-
-void Screen::setIsPausedToTrue() {
-  isPaused = true;
-}
-
-void Screen::setIsPausedToFalse() {
-  isPaused = false;
-}
-
-void Screen::updateScreen() {
-  update();
-}
-
 void Screen::increaseScaleY() {
-  //  // TODO: В моем представлении scale должен быть целым числом.
-  //  положительные
-  //  // увеличивают кратно, отрицательные уменьшают кратно
-  //  scale_y /= scaling_factor_y;
-  //  // TODO: не вижу глубокого смысла уведомлять об изменении scale. Кто-то
-  //  // изменил scale, тогда зачем этому кому-то об этом сообщать?
-  //  emit(yScaleChanged(
-  //      QString("y = ") +
-  //      QString::number(scale_y * (height_pixels / grid_vertical_segments))));
+  // TODO: В моем представлении scale должен быть целым числом.
+  // положительные увеличивают кратно, отрицательные уменьшают кратно
+  if (y_scale < 32768) {
+    y_scale *= 2;
+  }
 }
 
 void Screen::decreaseScaleY() {
-  //  scale_y *= scaling_factor_y;
-  //  emit(yScaleChanged(
-  //      QString("y = ") +
-  //      QString::number(scale_y * (height_pixels / grid_vertical_segments))));
+  if (y_scale > 1) {
+    y_scale /= 2;
+  }
 }
 
 void Screen::increaseScaleX() {
-  // TODO: В моем представлении scale должен быть положительным целым числом.
-  // Развертка должна изменяться с шагом периода дискретизации и только с таким
-  // шагом
-
-  //  int decrease = rendered_part_samples_length -
-  //                 (rendered_part_samples_length / scaling_factor_x);
-  //  int left = decrease / 2;
-  //  rendered_part_start += left;
-  //  rendered_part_samples_length -= decrease;
-  //  ring_buffer.setOffset(rendered_part_start);
-  //  emit(
-  //      xScaleChanged(QString("x = ") +
-  //                    QString::number(rendered_part_samples_length /
-  //                                    grid_horizontal_segments *
-  //                                    sample_size_ms) +
-  //                    QString(" ms")));
   if (x_scale > 1) {
     x_scale--;
   }
 }
 
 void Screen::decreaseScaleX() {
-  //  int increase = rendered_part_samples_length * scaling_factor_x -
-  //                 rendered_part_samples_length;
-  //  int left = increase / 2;
+  if ((x_scale + 1) * width() <= buffer->get_capacity()) {
+    x_scale++;
 
-  //  rendered_part_start -= left;
-  //  rendered_part_samples_length += increase;
-
-  //  if (rendered_part_start < 0) {
-  //    int shift = 0 - rendered_part_start;
-  //    rendered_part_start = 0;
-  //    rendered_part_samples_length += shift;
-
-  //    if (rendered_part_samples_length > screen_buffer_size) {
-  //      rendered_part_samples_length = screen_buffer_size;
-  //    }
-  //  }
-
-  //  if (rendered_part_start + rendered_part_samples_length >
-  //  screen_buffer_size) {
-  //    int shift =
-  //        rendered_part_start + rendered_part_samples_length -
-  //        screen_buffer_size;
-  //    if (rendered_part_start >= shift) {
-  //      rendered_part_start -= shift;
-  //    } else {
-  //      shift -= rendered_part_start;
-  //      rendered_part_start = 0;
-  //      rendered_part_samples_length -= shift;
-  //    }
-  //  }
-  //  ring_buffer.setOffset(rendered_part_start);
-
-  //  emit(
-  //      xScaleChanged(QString("x = ") +
-  //                    QString::number(rendered_part_samples_length /
-  //                                    grid_horizontal_segments *
-  //                                    sample_size_ms) +
-  //                    QString(" ms")));
-
-  x_scale++;
+    int len = rendered_part_start + width() * x_scale;
+    int excess = len - buffer->get_capacity();
+    if (excess > 0) {
+      rendered_part_start -= excess;
+    }
+  }
+  //  qDebug() << x_scale;
 }
 
 void Screen::shiftToLeft() {
-  // TODO: В моем представлении сдвиг должен быть положительным целым числом.
-  // Шаг сдвига = период дискретизации
-
-  //  int shift = rendered_part_samples_length / 10;
-  //  rendered_part_start =
-  //      rendered_part_start <= shift ? 0 : rendered_part_start - shift;
-  //  ring_buffer.setOffset(rendered_part_start);
+  for (int i = 0; i < 100; i++) {
+    if (rendered_part_start > 0) {
+      rendered_part_start--;
+    }
+  }
 }
 
 void Screen::shiftToRight() {
-  //  int shift = rendered_part_samples_length / 10;
-  //  int offset =
-  //      screen_buffer_size - (rendered_part_start +
-  //      rendered_part_samples_length);
-  //  rendered_part_start += std::min(offset, shift);
-  //  ring_buffer.setOffset(rendered_part_start);
+  for (int i = 0; i < 100; i++) {
+    if (rendered_part_start + 1 + width() * x_scale <= buffer->get_capacity()) {
+      rendered_part_start++;
+    }
+  }
+  qDebug() << rendered_part_start;
 }
 
 void Screen::shiftUp() {
-  //  pivot_y += vertical_shift_magnitude;
+  pivot_y += 25;
 }
 
 void Screen::shiftDown() {
-  //  pivot_y -= vertical_shift_magnitude;
+  pivot_y -= 25;
 }
 
 void Screen::paintEvent(QPaintEvent*) {
-  // TODO: эта строка оторвана от места где используется
-  //  int pointsNumber = std::min(width(), rendered_part_samples_length);
-
   convertBufferToPoints();
 
   drawGrid();
@@ -196,35 +103,15 @@ void Screen::paintEvent(QPaintEvent*) {
 }
 
 void Screen::convertBufferToPoints() {
-  //  // TODO:Почему мы рассчитываем масштаб во время отрисовки. Почему мы не
-  //  можем
-  //  // это делать при укладке данных в буфер экрана?
-  //  //при текущем подходе большая вычислительная нагрузка получается
-  //  if (width() >= rendered_part_samples_length) {
-  //    double step = width() / (double)rendered_part_samples_length;
-  //    for (int i = 0; i < rendered_part_samples_length; i++) {
-  //      int x = round(i * step);
-  //      //страшно ли переполнение y?; при большом масштабе по у scale_y
-  //      стремится
-  //      //к нулю, y -> бесконечности
-  //      // TODO: конечно могут быть переполнения. У тебя scale должен быть
-  //      // ограничен (очевидно, что если у тебя размах по y превышает шаг
-  //      // квантования, то нет смысла увеличивать)
+  // TODO:Почему мы рассчитываем масштаб во время отрисовки. Почему мы не можем
+  // это делать при укладке данных в буфер экрана?
+  //при текущем подходе большая вычислительная нагрузка получается
 
-  //      int y = pivot_y - ring_buffer.get(i) / scale_y;
-
-  //      points[i] = QPoint(x, y);
-  //    }
-  //  } else {
-  //    double step = (double)rendered_part_samples_length / width();
-  //    for (int i = 0; i < width(); i++) {
-  //      int x = i;
-  //      int y = pivot_y - ring_buffer.get(floor(i * step)) / scale_y;
-
-  //      points[i] = QPoint(x, y);
-  //    }
-  //  }
-
+  //страшно ли переполнение y?; при большом масштабе по у scale_y стремится
+  //к нулю, y -> бесконечности
+  // TODO: конечно могут быть переполнения. У тебя scale должен быть
+  // ограничен (очевидно, что если у тебя размах по y превышает шаг
+  // квантования, то нет смысла увеличивать)
   int tail = buffer->get_capacity() - rendered_part_start - width() * x_scale;
   int fst_projected = (buffer->get_w_index() - tail - width() * x_scale) %
                       buffer->get_capacity();
@@ -233,10 +120,9 @@ void Screen::convertBufferToPoints() {
   }
   double pixel_y_size = 65536.0 / (height() * y_scale);
   for (int i = 0; i < width(); i++) {
-    short y_pos =
+    int y_pos =
         pivot_y - buffer->peekAt(fst_projected + i * x_scale) / pixel_y_size;
     points[i] = QPoint(i, y_pos);
-    //    points[i] = QPoint(i, ring_buffer.get(i * x_scale));
   }
 }
 
