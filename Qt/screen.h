@@ -32,31 +32,33 @@ class Screen final : public QWidget, private NonMoveable<Screen> {
   void shiftUp();
   void shiftDown();
 
-  // Наверное лучше сделать метод инкапсуляции в буфер. Почему short?
-  // Нужно ли нам делать размер пакета произвольной длины?
-
  protected:
   void paintEvent(QPaintEvent*);
+  void resizeEvent(QResizeEvent* event);
 
  private:
+  std::vector<QLine> v_lines;
+  std::vector<QLine> h_lines;
+  QLine* zero_level_line = nullptr;
+  int top = 0;
+  int bottom = 0;
+  static const int RANGE = 65536 * 2;
+
   StrictRingBuffer* buffer;
 
+  void create_grid();
+  void update_top_bottom();
   void drawGrid();
   void convertBufferToPoints();
-
-  //размеры окна отрисовки в пикселях
-  enum {
-    width_pixels = 700,  // TODO: это не используется
-    height_pixels = 500  // TODO: что это? и почему оно 500?
-  };
 
   //  RingBuffer<short, screen_buffer_size> ring_buffer;  // TODO: почему short?
   QPoint* points;
   QTimer* screen_timer;
 
-  int y_scale = 1;
-  int x_scale = 10;
-  int pivot_y = height_pixels / 2;
+  int y_scale = 2;
+  int x_scale = 2;
+  // int pivot_y = height_pixels / 2;
+  int pivot_y = 0;
   int rendered_part_start = 0;  //начало отрисовываемой части буфера
 
   const int grid_horizontal_segments = 7;

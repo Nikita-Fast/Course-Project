@@ -35,6 +35,7 @@ void DataProcessor::decimate(short* base, int length, int factor) {
     decimation_offset = length % factor;
     return;
   }
+  qDebug() << "negative!";
 }
 
 void DataProcessor::interpolate(short* base, int length, int factor) {

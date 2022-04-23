@@ -21,7 +21,7 @@ class DataProcessor : public QObject {
 
  private:
   bool is_paused = false;
-  static const int input_freq = 25000;
+  static const int input_freq = 100000;
   static const int oscill_freq = 1000000;
 
   //  значение в последнем узле интерполяции в предыдущей итерации
