@@ -1,4 +1,5 @@
 #include "screen.h"
+#include <QHBoxLayout>
 #include <QTimer>
 #include "QtDebug"
 #include "cmath"
@@ -101,6 +102,7 @@ void Screen::shiftUp() {
   int diff = (RANGE / y_scale) / 10;
   top += diff;
   bottom += diff;
+  create_grid();
 }
 
 void Screen::shiftDown() {
@@ -108,10 +110,10 @@ void Screen::shiftDown() {
   int diff = (RANGE / y_scale) / 10;
   top -= diff;
   bottom -= diff;
+  create_grid();
 }
 
 void Screen::paintEvent(QPaintEvent*) {
-  //  qDebug() << x() << ", " << y();
   convertBufferToPoints();
 
   drawGrid();
@@ -121,8 +123,8 @@ void Screen::paintEvent(QPaintEvent*) {
   painter.setPen(pointPen);
 
   painter.drawPolyline(points, width());
-  //  qDebug() << x_scale;
   //  qDebug() << top << ", " << bottom;
+  //  qDebug() << h_grid_step_us << ", " << v_grid_step;
 }
 
 void Screen::update_top_bottom() {
@@ -143,18 +145,68 @@ void Screen::resizeEvent(QResizeEvent* event) {
   QWidget::resizeEvent(event);
 }
 
+void Screen::choose_v_grid_step() {
+  double pixel_y_size = (top - bottom) / (double)height();
+  int v_step = v_grid_step / pixel_y_size;
+  if (maximumHeight() / v_step > 8) {
+    v_grid_step *= 2;
+  } else {
+    if (maximumHeight() / v_step < 4) {
+      v_grid_step /= 2;
+    }
+  }
+  emit(send_v_grid_step(v_grid_step));
+}
+
+void Screen::choose_h_grid_step() {
+  int h_step = h_grid_step_us / x_scale;  //размер шага в пикселях
+  if (maximumWidth() / h_step > 8) {
+    h_grid_step_us *= 2;
+  } else {
+    if (maximumWidth() / h_step < 4) {
+      h_grid_step_us /= 2;
+    }
+  }
+  emit(send_h_grid_step(h_grid_step_us));
+}
+
 void Screen::create_grid() {
   h_lines.clear();
   v_lines.clear();
 
-  int h_step = 200 / x_scale;
-  for (int x = 0; x < maximumWidth(); x += h_step) {
+  //  for (int i = 0; i < x_labels.size(); i++) {
+  //    delete (x_labels.at(i));
+  //  }
+  //  x_labels.clear();
+
+  choose_h_grid_step();
+  int h_step = h_grid_step_us / x_scale;
+  int max = 0;
+
+  for (int x = 0, j = 0; x < maximumWidth(); x += h_step, j++) {
     v_lines.push_back(QLine(x, 0, x, maximumHeight() - 1));
+
+    if (j < x_labels.size()) {
+      x_labels.at(j)->setNum(h_grid_step_us * j);
+      x_labels.at(j)->setGeometry(x, 30, 50, 20);
+      x_labels.at(j)->setVisible(true);
+    } else {
+      QLabel* lbl = new QLabel(this);
+      lbl->setNum(h_grid_step_us * j);
+      lbl->setGeometry(x, 30, 50, 20);
+      lbl->setStyleSheet("QLabel { background-color : black; color : cyan}");
+      x_labels.push_back(lbl);
+    }
+    max = j;
   }
 
-  int v_dist = 5000;
+  for (int i = max + 1; i < x_labels.size(); i++) {
+    x_labels.at(i)->setVisible(false);
+  }
+
+  choose_v_grid_step();
+  int v_dist = v_grid_step;
   double pixel_y_size = (top - bottom) / (double)height();
-  // int v_step = 5000 / pixel_y_size;
   int y_base = ceil(bottom / (double)v_dist) * v_dist;
   for (int y = y_base; y < top; y += v_dist) {
     int y_pos = height() - ((y - bottom) / pixel_y_size);
@@ -195,8 +247,6 @@ void Screen::convertBufferToPoints() {
 }
 
 void Screen::drawGrid() {
-  // TODO: зачем нам тут рассчитывать масштабы?
-
   QPainter painter(this);
   QPen gridPen(Qt::gray, 0, Qt::DotLine);
   painter.setPen(gridPen);

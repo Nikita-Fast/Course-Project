@@ -1,22 +1,25 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
+#include <QLabel>
 #include <QWidget>
-//#include <array> // TODO: лишний инклюд
 #include "StrictRingBuffer.h"
 #include "nonmoveable.h"
-
-//#include "ringbuffer.h"
 
 // TODO: экран работает на своей частоте дискретизации (обычно где нибудь 50
 // МГц). Входные данные должны поступать на него с этой частотой
 class Screen final : public QWidget, private NonMoveable<Screen> {
   Q_OBJECT
+
  public:
   explicit Screen(QWidget* parent = nullptr);
   ~Screen();
 
   void set_buffer(StrictRingBuffer* buffer);
+
+ signals:
+  void send_h_grid_step(int h_grid_step_us);
+  void send_v_grid_step(int v_grid_step);
 
  public slots:
 
@@ -37,15 +40,21 @@ class Screen final : public QWidget, private NonMoveable<Screen> {
   void resizeEvent(QResizeEvent* event);
 
  private:
+  std::vector<QLabel*> x_labels;
+  QLabel* label = nullptr;
   std::vector<QLine> v_lines;
   std::vector<QLine> h_lines;
   QLine* zero_level_line = nullptr;
+  int h_grid_step_us = 200;
+  int v_grid_step = 3000;
   int top = 0;
   int bottom = 0;
   static const int RANGE = 65536 * 2;
 
   StrictRingBuffer* buffer;
 
+  void choose_v_grid_step();
+  void choose_h_grid_step();
   void create_grid();
   void update_top_bottom();
   void drawGrid();
@@ -57,7 +66,6 @@ class Screen final : public QWidget, private NonMoveable<Screen> {
 
   int y_scale = 2;
   int x_scale = 2;
-  // int pivot_y = height_pixels / 2;
   int pivot_y = 0;
   int rendered_part_start = 0;  //начало отрисовываемой части буфера
 

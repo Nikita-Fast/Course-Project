@@ -69,10 +69,10 @@ Oscilloscope::Oscilloscope(QWidget* parent)
   connect(right_shift_btn, SIGNAL(clicked()), screen, SLOT(shiftToRight()));
   connect(up_shift_btn, SIGNAL(clicked()), screen, SLOT(shiftUp()));
   connect(down_shift_btn, SIGNAL(clicked()), screen, SLOT(shiftDown()));
-  //  connect(screen, SIGNAL(yScaleChanged(QString)), scale_y_label,
-  //          SLOT(setText(QString)));
-  //  connect(screen, SIGNAL(xScaleChanged(QString)), scale_x_label,
-  //          SLOT(setText(QString)));
+  connect(screen, SIGNAL(send_v_grid_step(int)), scale_y_label,
+          SLOT(setNum(int)));
+  connect(screen, SIGNAL(send_h_grid_step(int)), scale_x_label,
+          SLOT(setNum(int)));
   connect(pause_btn, SIGNAL(clicked()), processor, SLOT(set_is_paused_true()));
   connect(start_btn, SIGNAL(clicked()), processor, SLOT(set_is_paused_false()));
 }
