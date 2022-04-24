@@ -85,6 +85,7 @@ void Screen::shiftToLeft() {
       rendered_part_start -= x_scale;
     }
   }
+  create_grid();
 }
 
 void Screen::shiftToRight() {
@@ -94,6 +95,7 @@ void Screen::shiftToRight() {
       rendered_part_start += x_scale;
     }
   }
+  create_grid();
   //  qDebug() << rendered_part_start;
 }
 
@@ -125,6 +127,7 @@ void Screen::paintEvent(QPaintEvent*) {
   painter.drawPolyline(points, width());
   //  qDebug() << top << ", " << bottom;
   //  qDebug() << h_grid_step_us << ", " << v_grid_step;
+  //  qDebug() << rendered_part_start;
 }
 
 void Screen::update_top_bottom() {
@@ -174,27 +177,30 @@ void Screen::create_grid() {
   h_lines.clear();
   v_lines.clear();
 
-  //  for (int i = 0; i < x_labels.size(); i++) {
-  //    delete (x_labels.at(i));
-  //  }
-  //  x_labels.clear();
-
   choose_h_grid_step();
   int h_step = h_grid_step_us / x_scale;
   int max = 0;
 
-  for (int x = 0, j = 0; x < maximumWidth(); x += h_step, j++) {
+  /*подозреваю, важно, что сейчас частота экрана 1 МГц и поэтому
+     rendered_part_start, который обозначает число сэплов, на которые мы
+     отступили вправо, совпадает с числом микросекунд, которым равен этот
+     отступ. При другой частоте получение x_base вероятно изменится*/
+  int x_base = (rendered_part_start / h_grid_step_us + 1) * h_grid_step_us;
+
+  for (int x = (x_base - rendered_part_start) / x_scale, j = 0;
+       x < maximumWidth(); x += h_step, j++) {
     v_lines.push_back(QLine(x, 0, x, maximumHeight() - 1));
 
     if (j < x_labels.size()) {
-      x_labels.at(j)->setNum(h_grid_step_us * j);
-      x_labels.at(j)->setGeometry(x, 30, 50, 20);
+      x_labels.at(j)->setNum(x_base + h_grid_step_us * j);
+      x_labels.at(j)->setGeometry(x + 1, 30, 50, 20);
       x_labels.at(j)->setVisible(true);
     } else {
       QLabel* lbl = new QLabel(this);
       lbl->setNum(h_grid_step_us * j);
       lbl->setGeometry(x, 30, 50, 20);
-      lbl->setStyleSheet("QLabel { background-color : black; color : cyan}");
+      lbl->setStyleSheet(
+          "QLabel { background-color : rgba(0,0,0,0%); color : yellow}");
       x_labels.push_back(lbl);
     }
     max = j;
@@ -203,14 +209,32 @@ void Screen::create_grid() {
   for (int i = max + 1; i < x_labels.size(); i++) {
     x_labels.at(i)->setVisible(false);
   }
+  max = 0;
 
   choose_v_grid_step();
   int v_dist = v_grid_step;
   double pixel_y_size = (top - bottom) / (double)height();
   int y_base = ceil(bottom / (double)v_dist) * v_dist;
-  for (int y = y_base; y < top; y += v_dist) {
+  for (int y = y_base, j = 0; y < top; y += v_dist, j++) {
     int y_pos = height() - ((y - bottom) / pixel_y_size);
     h_lines.push_back(QLine(0, y_pos, maximumWidth() - 1, y_pos));
+
+    if (j < y_labels.size()) {
+      y_labels.at(j)->setNum(y);
+      y_labels.at(j)->setGeometry(20, y_pos + 1, 50, 20);
+      y_labels.at(j)->setVisible(true);
+    } else {
+      QLabel* lbl = new QLabel(this);
+      lbl->setNum(h_grid_step_us * j);
+      lbl->setGeometry(20, y_pos, 50, 20);
+      lbl->setStyleSheet(
+          "QLabel { background-color : rgba(0,0,0,0%); color : cyan}");
+      y_labels.push_back(lbl);
+    }
+    max = j;
+  }
+  for (int i = max + 1; i < y_labels.size(); i++) {
+    y_labels.at(i)->setVisible(false);
   }
 
   if (top > 0 && bottom < 0) {

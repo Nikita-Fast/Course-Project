@@ -41,6 +41,7 @@ class Screen final : public QWidget, private NonMoveable<Screen> {
 
  private:
   std::vector<QLabel*> x_labels;
+  std::vector<QLabel*> y_labels;
   QLabel* label = nullptr;
   std::vector<QLine> v_lines;
   std::vector<QLine> h_lines;
