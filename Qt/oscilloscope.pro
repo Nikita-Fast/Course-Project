@@ -1,4 +1,4 @@
-QT       += core gui network
+QT       += core gui network serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -13,8 +13,11 @@ SOURCES += \
     main.cpp \
     oscilloscope.cpp \
     screen.cpp \
+    uartinterface.cpp \
     udpinterface.cpp \
-    worker.cpp
+    worker.cpp \
+    io_uart.cpp \
+    CRC16.cpp
 
 HEADERS += \
     StrictRingBuffer.h \
@@ -24,8 +27,11 @@ HEADERS += \
     oscilloscope.h \
     ringbuffer.h \
     screen.h \
+    uartinterface.h \
     udpinterface.h \
-    worker.h
+    worker.h \
+    io_uart.h \
+    CRC16.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

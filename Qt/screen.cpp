@@ -279,7 +279,7 @@ void Screen::drawGrid() {
   painter.drawLines(h_lines.data(), h_lines.size());
 
   if (zero_level_line != nullptr) {
-    QPen zero_level_line_pen(Qt::gray, 1, Qt::SolidLine);
+    QPen zero_level_line_pen(Qt::gray, 2, Qt::SolidLine);
     painter.setPen(zero_level_line_pen);
     painter.drawLine(*zero_level_line);
   }

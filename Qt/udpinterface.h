@@ -5,18 +5,17 @@
 #include <QUdpSocket>
 #include "datainterface.h"
 
-class UdpInterface : public DataInterface
-{
-    Q_OBJECT
-public:
-    explicit UdpInterface();
+class UdpInterface : public DataInterface {
+  Q_OBJECT
+ public:
+  explicit UdpInterface();
 
-public slots:
-    void sendDataToOscilloscope();
+ public slots:
+  void sendDataToOscilloscope();
 
-private:
-    QUdpSocket *socket = nullptr;
-    void packetToArray(const QByteArray packet, short *dst);
+ private:
+  QUdpSocket* socket = nullptr;
+  void packetToArray(const QByteArray packet, short* dst);
 };
 
-#endif // UDPINTERFACE_H
+#endif  // UDPINTERFACE_H
