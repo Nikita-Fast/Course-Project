@@ -10,6 +10,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include "udpinterface.h"
+#include "uartinterface.h"
 
 Oscilloscope::Oscilloscope(QWidget* parent)
     : QMainWindow(parent),

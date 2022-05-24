@@ -14,7 +14,7 @@ void Worker::processFrame(StrictRingBuffer *buf)
     buf->read(frame, frame_size);
 
     //processing
-    processingFunction1(frame);
+    //processingFunction1(frame);
 
     //send to screen
     //кто освобождает память? Пусть пока это будет Screen::receiveFrame

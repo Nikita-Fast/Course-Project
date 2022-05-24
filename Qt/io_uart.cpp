@@ -4,15 +4,15 @@
 //#include "gui_uart_log.h"
 
 //#include "global_repeater.h"
+#include "qdebug.h"
 
 using namespace io;
-
 Uart::Uart(QString Uart_Name, QObject* parent)
     : QObject(parent), rx_buffer(MAX_RX_BUFFER_SIZE, 0), uart_name(Uart_Name) {
   num_rx_bytes = 0;
   index = 0;
   corrector = 0;
-  port.setBaudRate(QSerialPort::BaudRate::Baud115200);
+  port.setBaudRate(460800);
   port.setParity(QSerialPort::Parity::NoParity);
   port.setFlowControl(QSerialPort::FlowControl::NoFlowControl);
   port.setDataBits(QSerialPort::DataBits::Data8);
@@ -53,6 +53,7 @@ bool Uart::open() {
     QString str = port.errorString();
     emit error(str);
   }
+  QString str = port.errorString();
   index = 0;
   corrector = 0;
   return port.isOpen();
