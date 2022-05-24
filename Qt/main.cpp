@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
   Oscilloscope w;
   w.show();
 
-  UartInterface *uart = new UartInterface;
+  //UartInterface *uart = new UartInterface;
 
   return a.exec();
 }

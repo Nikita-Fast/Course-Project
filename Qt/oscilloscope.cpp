@@ -14,8 +14,8 @@
 
 Oscilloscope::Oscilloscope(QWidget* parent)
     : QMainWindow(parent),
-      screen(new Screen(this)),
-      processor(new DataProcessor()),
+      screen(new Screen(OSCILL_FREQ_HZ, this)),
+      processor(new DataProcessor(OSCILL_FREQ_HZ)),
       dataInterface(new UdpInterface)  // TODO: это внешний интерфейс
 {
   buffer = new StrictRingBuffer(BUFFER_SIZE);

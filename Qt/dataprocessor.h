@@ -10,7 +10,7 @@ class StrictRingBuffer;
 class DataProcessor : public QObject {
   Q_OBJECT
  public:
-  explicit DataProcessor(QObject* parent = nullptr);
+  explicit DataProcessor(int oscill_freq,QObject* parent = nullptr);
   void setBuffer(StrictRingBuffer* buffer);
 
  public slots:
@@ -22,7 +22,7 @@ class DataProcessor : public QObject {
  private:
   bool is_paused = false;
   static const int input_freq = 1000000;
-  static const int oscill_freq = 1000000;
+  const int oscill_freq;
 
   //  значение в последнем узле интерполяции в предыдущей итерации
   short last_interpolation_node = 0;

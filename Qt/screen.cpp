@@ -5,7 +5,7 @@
 #include "cmath"
 #include "qpainter.h"
 
-Screen::Screen(QWidget* parent) : QWidget(parent) {
+Screen::Screen(int oscill_freq, QWidget* parent) : QWidget(parent), oscill_freq(oscill_freq) {
   // TODO: экран должен менять свои размеры. Можно задаться минимальным размером
   // (если точек на экране (пикселей) меньше чем нужно отобразить, то в этом
   // случае нужно делать децимацию)
@@ -162,7 +162,7 @@ void Screen::choose_v_grid_step() {
 }
 
 void Screen::choose_h_grid_step() {
-  int h_step = h_grid_step_us / x_scale;  //размер шага в пикселях
+  int h_step = (h_grid_step_us * (oscill_freq / 1000000.0)) / x_scale;  //размер шага в пикселях
   if (maximumWidth() / h_step > 8) {
     h_grid_step_us *= 2;
   } else {
@@ -178,21 +178,23 @@ void Screen::create_grid() {
   v_lines.clear();
 
   choose_h_grid_step();
-  int h_step = h_grid_step_us / x_scale;
+  int h_step = (h_grid_step_us  * (oscill_freq / 1000000.0)) / x_scale;
   int max = 0;
 
   /*подозреваю, важно, что сейчас частота экрана 1 МГц и поэтому
      rendered_part_start, который обозначает число сэплов, на которые мы
      отступили вправо, совпадает с числом микросекунд, которым равен этот
      отступ. При другой частоте получение x_base вероятно изменится*/
-  int x_base = (rendered_part_start / h_grid_step_us + 1) * h_grid_step_us;
+  int h_grid_step_in_samples = (h_grid_step_us  * (oscill_freq / 1000000.0));
+
+  int x_base = (rendered_part_start / (h_grid_step_us  * h_grid_step_in_samples) + 1) * h_grid_step_in_samples;
 
   for (int x = (x_base - rendered_part_start) / x_scale, j = 0;
        x < maximumWidth(); x += h_step, j++) {
     v_lines.push_back(QLine(x, 0, x, maximumHeight() - 1));
 
     if (j < x_labels.size()) {
-      x_labels.at(j)->setNum(x_base + h_grid_step_us * j);
+      x_labels.at(j)->setNum((x_base / ((oscill_freq / 1000000.0))) + h_grid_step_us * j);
       x_labels.at(j)->setGeometry(x + 1, 30, 50, 20);
       x_labels.at(j)->setVisible(true);
     } else {

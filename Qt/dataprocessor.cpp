@@ -2,7 +2,7 @@
 #include "QtDebug"
 #include "StrictRingBuffer.h"
 
-DataProcessor::DataProcessor(QObject* parent) : QObject(parent) {}
+DataProcessor::DataProcessor(int osc_freq, QObject* parent) : QObject(parent), oscill_freq (osc_freq) {}
 
 void DataProcessor::setBuffer(StrictRingBuffer* buffer) {
   this->buffer = buffer;

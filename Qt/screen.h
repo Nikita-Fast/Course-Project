@@ -12,7 +12,7 @@ class Screen final : public QWidget, private NonMoveable<Screen> {
   Q_OBJECT
 
  public:
-  explicit Screen(QWidget* parent = nullptr);
+  explicit Screen(int oscilloscope_freq, QWidget* parent = nullptr);
   ~Screen();
 
   void set_buffer(StrictRingBuffer* buffer);
@@ -40,6 +40,7 @@ class Screen final : public QWidget, private NonMoveable<Screen> {
   void resizeEvent(QResizeEvent* event);
 
  private:
+  const int oscill_freq;
   std::vector<QLabel*> x_labels;
   std::vector<QLabel*> y_labels;
   QLabel* label = nullptr;
