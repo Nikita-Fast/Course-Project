@@ -10,6 +10,7 @@ CONFIG += c++11
 
 SOURCES += \
     dataprocessor.cpp \
+    firfilter.cpp \
     main.cpp \
     oscilloscope.cpp \
     screen.cpp \
@@ -23,6 +24,7 @@ HEADERS += \
     StrictRingBuffer.h \
     datainterface.h \
     dataprocessor.h \
+    firfilter.h \
     nonmoveable.h \
     oscilloscope.h \
     ringbuffer.h \

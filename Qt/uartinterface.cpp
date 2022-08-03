@@ -14,14 +14,14 @@ UartInterface::UartInterface() {
     connect(uart, SIGNAL(error(QString)), this, SLOT(error_response(QString)));
 
     if (uart->open()) {
-      qDebug() << "порт открыт!";
+      qDebug() << "port opened!";
       QByteArray bytes;
       bytes.resize(2);
       bytes[0] = 0x82;
       bytes[1] = 0x00;
 
 //      if (uart->write(bytes)) {
-//        qDebug() << "данные посланы";
+//        qDebug() << "data sent";
 
 //      } else {
 //        qDebug() << "метод write вернул false";
@@ -33,10 +33,10 @@ UartInterface::UartInterface() {
 }
 
 void UartInterface::station_answered(QByteArray bytes) {
-//    qDebug() << "станция ответила";
+//  qDebug() << "station answered";
 //  unsigned char byte = bytes[0];
 //  if (byte == 0x82) {
-//    qDebug() << "станция ответила правильно";
+//    qDebug() << "correct answer";
 //  }
 
     //qDebug() << bytes.size();
@@ -47,7 +47,7 @@ void UartInterface::station_answered(QByteArray bytes) {
     for (int i = 2; i < bytes.size(); i += 2) {
       unsigned char b0 = bytes[i];
       unsigned char b1 = bytes[i + 1];
-      samples[(i - 2) / 2] = (short)((b0 << 8) | b1);
+      samples[(i - 2) / 2] = (short)((b1 << 8) | b0);
 //      qDebug() << samples[(i - 2) / 2];
     }
     emit(packetSent(samples, samples_number));

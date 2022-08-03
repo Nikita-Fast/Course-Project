@@ -12,6 +12,8 @@ Uart::Uart(QString Uart_Name, QObject* parent)
   num_rx_bytes = 0;
   index = 0;
   corrector = 0;
+  //скорость 115200 для порта управления
+  //скорость 460800 для порта данных
   port.setBaudRate(460800);
   port.setParity(QSerialPort::Parity::NoParity);
   port.setFlowControl(QSerialPort::FlowControl::NoFlowControl);
@@ -174,6 +176,7 @@ bool Uart::write(const std::initializer_list<quint8>& data) {
 void Uart::read_from_uart() {
   while (!port.atEnd()) {
     QByteArray bytes = port.readAll();
+
     if (raw_data_file.isOpen()) {
       num_rx_bytes += bytes.size();
       raw_data_file.write(bytes);

@@ -16,8 +16,8 @@ class Oscilloscope final : public QMainWindow,
  public:
   explicit Oscilloscope(QWidget* parent = nullptr);
   ~Oscilloscope();
-  static const int BUFFER_SIZE = 16384;
-  static const int OSCILL_FREQ_HZ = 10000000;
+  static const int BUFFER_SIZE = 4000;
+  static const int OSCILL_FREQ_HZ = 8000;
 
  private:
   Screen* screen;

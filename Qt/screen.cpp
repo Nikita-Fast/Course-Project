@@ -162,14 +162,15 @@ void Screen::choose_v_grid_step() {
 }
 
 void Screen::choose_h_grid_step() {
-  int h_step = (h_grid_step_us * (oscill_freq / 1000000.0)) / x_scale;  //размер шага в пикселях
-  if (maximumWidth() / h_step > 8) {
-    h_grid_step_us *= 2;
-  } else {
-    if (maximumWidth() / h_step < 4) {
-      h_grid_step_us /= 2;
+
+    double discretization_period_us = 1000000.0 / oscill_freq;
+    double full_screen_time_us = maximumWidth() * x_scale * discretization_period_us;
+
+    int k = full_screen_time_us / h_grid_step_us;
+    if (k > 8 || k < 4) {
+        h_grid_step_us = floor( full_screen_time_us / 6);
     }
-  }
+
   emit(send_h_grid_step(h_grid_step_us));
 }
 

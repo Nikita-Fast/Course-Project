@@ -8,7 +8,7 @@ import java.util.concurrent.CountDownLatch;
 
 public class UDPSender {
     public final static int SERVICE_PORT = 50001;
-    public static final int PACKET_SIZE = 128;
+    public static final int PACKET_SIZE = 256 * 2;
     public static final String HOST_NAME = "localhost";
     public static final int PACKETS_FOR_ONE_SEC_OF_SIGNAL = SignalGenerator.SAMPLING_RATE / (PACKET_SIZE / 2);
     public static final double TOLERANCE = 3.0;

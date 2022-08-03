@@ -21,17 +21,10 @@ class DataProcessor : public QObject {
 
  private:
   bool is_paused = false;
-  static const int input_freq = 1000000;
+  static const int input_freq = 8000;
   const int oscill_freq;
-
-  //  значение в последнем узле интерполяции в предыдущей итерации
-  short last_interpolation_node = 0;
-  short decimation_offset = 0;
-
   StrictRingBuffer* buffer;
 
-  void interpolate(short* base, int length, int factor);
-  void decimate(short* base, int length, int factor);
 };
 
 #endif  // DATAPROCESSOR_H

@@ -67,7 +67,7 @@ class Screen final : public QWidget, private NonMoveable<Screen> {
   QTimer* screen_timer;
 
   int y_scale = 2;
-  int x_scale = 2;
+  int x_scale = 1;
   int pivot_y = 0;
   int rendered_part_start = 0;  //начало отрисовываемой части буфера
 
