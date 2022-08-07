@@ -38,9 +38,52 @@ void DataProcessor::writePacketToBuf(short* packet, int length) {
           input[i * 8] = packet[i];
       }
       interpol_filter.filter(input, 8 * length,output);
-      for (int i = 0; i < 8 * length; i++) {
-                buffer->write_or_rewrite(output[i]);
+
+        //trigger part
+
+      if (trigger_is_active) {
+          qDebug() << "collected: " << samples_collected;
+
+          if (collecting_is_started && samples_collected < buffer->get_capacity()) {
+              for (int i = 0; (i < 8 * length) && (samples_collected < buffer->get_capacity()); i++) {
+                        buffer->write_or_rewrite(output[i]);
+                        samples_collected++;
+              }
+          }
+          else {
+              int index = 0;
+              for (int i = 0; i < 8 * length; i++) {
+                  if (output[i] > trigger_level) {
+                        collecting_is_started = true;
+                        index = i;
+                        break;
+                  }
+              }
+              if (collecting_is_started) {
+                  for (int i = index; i < 8 * length && (samples_collected < buffer->get_capacity()); i++) {
+                      buffer->write_or_rewrite(output[i]);
+                      samples_collected++;
+                  }
+              }
+          }
+
+          if (samples_collected >= buffer->get_capacity()) {
+              collecting_is_started = false;
+              is_paused = true;
+          }
       }
+      else {
+            for (int i = 0; i < 8 * length; i++) {
+                      buffer->write_or_rewrite(output[i]);
+            }
+
+      }
+
+      /*end of trigger*/
+
+//      for (int i = 0; i < 8 * length; i++) {
+//                buffer->write_or_rewrite(output[i]);
+//      }
 
 
 //      for (int i = 0; i < length; i++) {

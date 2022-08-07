@@ -13,6 +13,11 @@ class DataProcessor : public QObject {
   explicit DataProcessor(int oscill_freq,QObject* parent = nullptr);
   void setBuffer(StrictRingBuffer* buffer);
 
+  bool trigger_is_active = true;
+  short trigger_level = 6000;
+  bool collecting_is_started = false;
+  int samples_collected = 0;
+
  public slots:
   void set_is_paused_true();  // TODO: это ай яй яй
   void set_is_paused_false();
@@ -20,6 +25,7 @@ class DataProcessor : public QObject {
   void writePacketToBuf(short* packet, int length);
 
  private:
+
   bool is_paused = false;
   static const int input_freq = 8000;
   const int oscill_freq;

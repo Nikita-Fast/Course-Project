@@ -12,7 +12,7 @@
 int main(int argc, char* argv[]) {
   QApplication a(argc, argv);
   Oscilloscope w;
-  w.show();
+  w.window->show();
 
 
   //UartInterface *uart = new UartInterface;

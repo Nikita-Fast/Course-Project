@@ -12,6 +12,7 @@ SOURCES += \
     dataprocessor.cpp \
     firfilter.cpp \
     main.cpp \
+    mywindow.cpp \
     oscilloscope.cpp \
     screen.cpp \
     uartinterface.cpp \
@@ -25,6 +26,7 @@ HEADERS += \
     datainterface.h \
     dataprocessor.h \
     firfilter.h \
+    mywindow.h \
     nonmoveable.h \
     oscilloscope.h \
     ringbuffer.h \

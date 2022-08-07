@@ -13,10 +13,15 @@
 #include "uartinterface.h"
 
 #include <QResizeEvent>
+#include "mywindow.h"
 
-Oscilloscope::Oscilloscope(QWidget* parent)
-    : QMainWindow(parent),
-      screen(new Screen(OSCILL_FREQ_HZ, this)),
+Oscilloscope::Oscilloscope(
+        QObject*
+//        QWidget* parent
+        )
+    :
+      window(new MyWindow(nullptr)),
+      screen(new Screen(OSCILL_FREQ_HZ, window)),
       processor(new DataProcessor(OSCILL_FREQ_HZ)),
       dataInterface(new UdpInterface)  // TODO: это внешний интерфейс
 {
@@ -24,7 +29,7 @@ Oscilloscope::Oscilloscope(QWidget* parent)
   screen->set_buffer(buffer);
   processor->setBuffer(buffer);
 
-  QGroupBox* control_group = new QGroupBox("Панель управления", this);
+  QGroupBox* control_group = new QGroupBox("Панель управления", window);
   QVBoxLayout* btns_lbls_layout = new QVBoxLayout(control_group);
   QPushButton* inc_scale_y_btn = new QPushButton("scale_y++");
   QPushButton* dec_scale_y_btn = new QPushButton("scale_y--");
@@ -53,11 +58,11 @@ Oscilloscope::Oscilloscope(QWidget* parent)
   btns_lbls_layout->addWidget(scale_y_label);
   btns_lbls_layout->addWidget(scale_x_label);
 
-  setCentralWidget(screen);
+  window->setCentralWidget(screen);
 
-  QDockWidget* panel = new QDockWidget(this);
+  QDockWidget* panel = new QDockWidget(window);
   panel->setWidget(control_group);
-  addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, panel);
+  window->addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, panel);
 
   connect(dataInterface, SIGNAL(packetSent(short*, int)), processor,
           SLOT(writePacketToBuf(short*, int)));
@@ -80,46 +85,55 @@ Oscilloscope::Oscilloscope(QWidget* parent)
   connect(start_btn, SIGNAL(clicked()), processor, SLOT(set_is_paused_false()));
 
   //screen->installEventFilter(this);
-  installEventFilter(this);
+  //installEventFilter(this);
+  window->installEventFilter(this);
 }
 
 Oscilloscope::~Oscilloscope() {
     delete buffer;
 }
 
-void Oscilloscope::resizeEvent(QResizeEvent *event)
-{
-//      const QSize sizeEventOld = event->oldSize();
-//      const QSize sizeEvent = event->size();
-//    //  qDebug() << sizeEventOld << ", " << sizeEvent;
+//void Oscilloscope::resizeEvent(QResizeEvent *event)
+//{
+////      const QSize sizeEventOld = event->oldSize();
+////      const QSize sizeEvent = event->size();
+////    //  qDebug() << sizeEventOld << ", " << sizeEvent;
 
-//      if (screen-> get_rendered_part_start() + sizeEvent.width() * screen->get_x_scale() > buffer->get_capacity()) {
-//          qDebug() << "went out of buffer";
-//            resize(sizeEventOld);
-//      }
-//      else {
-//          QWidget::resizeEvent(event);
-//      }
-    QWidget::resizeEvent(event);
-}
+////      if (screen-> get_rendered_part_start() + sizeEvent.width() * screen->get_x_scale() > buffer->get_capacity()) {
+////          qDebug() << "went out of buffer";
+////            resize(sizeEventOld);
+////      }
+////      else {
+////          QWidget::resizeEvent(event);
+////      }
+//    QWidget::resizeEvent(event);
+//}
 
 bool Oscilloscope::eventFilter(QObject *obj, QEvent *event)
 {
-    if (event->type() == QEvent::Resize) {
-        QResizeEvent *resize_event = static_cast<QResizeEvent *>(event);
-        const QSize sizeEventOld = resize_event->oldSize();
-        const QSize sizeEvent = resize_event->size();
-         qDebug() << sizeEventOld << ", " << sizeEvent;
-
-        if (screen->get_rendered_part_start() + sizeEvent.width() * screen->get_x_scale() > buffer->get_capacity()) {
-//            int max_w = (buffer->get_capacity() - screen->get_rendered_part_start()) / screen->get_x_scale();
-//            screen->resize(max_w, 500);
-            resize(sizeEventOld);
-            return true;
+    if (obj == window) {
+        if (event->type() == QEvent::Resize) {
+            QResizeEvent *resize_event = static_cast<QResizeEvent *>(event);
+            const QSize sizeEventOld = resize_event->oldSize();
+            const QSize sizeEvent = resize_event->size();
+            qDebug() << sizeEventOld << ", " << sizeEvent;
+            if (screen->get_rendered_part_start() + sizeEvent.width() * screen->get_x_scale() > buffer->get_capacity()) {
+                int max_w = (buffer->get_capacity() - screen->get_rendered_part_start()) / screen->get_x_scale();
+                screen->resize(max_w, 500);
+                qDebug() << max_w;
+                window->resize(max_w + 140, 500);
+                return true;
+            }
+            else {
+                window->resize(sizeEvent);
+                return true;
+            }
         }
         else {
-            // standard event processing
-            return QObject::eventFilter(obj, event);
+            return false;
         }
+    }
+    else {
+        return QObject::eventFilter(obj, event);
     }
 }
