@@ -12,6 +12,8 @@
 #include "udpinterface.h"
 #include "uartinterface.h"
 
+#include <QResizeEvent>
+
 Oscilloscope::Oscilloscope(QWidget* parent)
     : QMainWindow(parent),
       screen(new Screen(OSCILL_FREQ_HZ, this)),
@@ -76,8 +78,48 @@ Oscilloscope::Oscilloscope(QWidget* parent)
           SLOT(setNum(int)));
   connect(pause_btn, SIGNAL(clicked()), processor, SLOT(set_is_paused_true()));
   connect(start_btn, SIGNAL(clicked()), processor, SLOT(set_is_paused_false()));
+
+  //screen->installEventFilter(this);
+  installEventFilter(this);
 }
 
 Oscilloscope::~Oscilloscope() {
-  delete buffer;
+    delete buffer;
+}
+
+void Oscilloscope::resizeEvent(QResizeEvent *event)
+{
+//      const QSize sizeEventOld = event->oldSize();
+//      const QSize sizeEvent = event->size();
+//    //  qDebug() << sizeEventOld << ", " << sizeEvent;
+
+//      if (screen-> get_rendered_part_start() + sizeEvent.width() * screen->get_x_scale() > buffer->get_capacity()) {
+//          qDebug() << "went out of buffer";
+//            resize(sizeEventOld);
+//      }
+//      else {
+//          QWidget::resizeEvent(event);
+//      }
+    QWidget::resizeEvent(event);
+}
+
+bool Oscilloscope::eventFilter(QObject *obj, QEvent *event)
+{
+    if (event->type() == QEvent::Resize) {
+        QResizeEvent *resize_event = static_cast<QResizeEvent *>(event);
+        const QSize sizeEventOld = resize_event->oldSize();
+        const QSize sizeEvent = resize_event->size();
+         qDebug() << sizeEventOld << ", " << sizeEvent;
+
+        if (screen->get_rendered_part_start() + sizeEvent.width() * screen->get_x_scale() > buffer->get_capacity()) {
+//            int max_w = (buffer->get_capacity() - screen->get_rendered_part_start()) / screen->get_x_scale();
+//            screen->resize(max_w, 500);
+            resize(sizeEventOld);
+            return true;
+        }
+        else {
+            // standard event processing
+            return QObject::eventFilter(obj, event);
+        }
+    }
 }

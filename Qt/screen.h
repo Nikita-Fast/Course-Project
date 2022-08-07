@@ -17,6 +17,9 @@ class Screen final : public QWidget, private NonMoveable<Screen> {
 
   void set_buffer(StrictRingBuffer* buffer);
 
+  int get_rendered_part_start();
+  int get_x_scale();
+
  signals:
   void send_h_grid_step(int h_grid_step_us);
   void send_v_grid_step(int v_grid_step);

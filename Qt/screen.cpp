@@ -4,6 +4,7 @@
 #include "QtDebug"
 #include "cmath"
 #include "qpainter.h"
+#include <QResizeEvent>
 
 Screen::Screen(int oscill_freq, QWidget* parent) : QWidget(parent), oscill_freq(oscill_freq) {
   // TODO: экран должен менять свои размеры. Можно задаться минимальным размером
@@ -38,7 +39,17 @@ Screen::~Screen() {
 }
 
 void Screen::set_buffer(StrictRingBuffer* buffer) {
-  this->buffer = buffer;
+    this->buffer = buffer;
+}
+
+int Screen::get_rendered_part_start()
+{
+    return rendered_part_start;
+}
+
+int Screen::get_x_scale()
+{
+    return x_scale;
 }
 
 void Screen::increaseScaleY() {
@@ -145,7 +156,18 @@ void Screen::resizeEvent(QResizeEvent* event) {
   update_top_bottom();
   create_grid();
 
-  QWidget::resizeEvent(event);
+//  const QSize sizeEventOld = event->oldSize();
+//  const QSize sizeEvent = event->size();
+//  qDebug() << sizeEventOld << ", " << sizeEvent;
+
+//  if (rendered_part_start + sizeEvent.width() * x_scale > buffer->get_capacity()) {
+//      qDebug() << "went out of buffer";
+//        resize(sizeEventOld);
+//  }
+//  else {
+//      QWidget::resizeEvent(event);
+//  }
+//  QWidget::resizeEvent(event);
 }
 
 void Screen::choose_v_grid_step() {
