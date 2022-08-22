@@ -9,25 +9,32 @@ class Screen;
 class DataInterface;
 class StrictRingBuffer;
 class MyWindow;
+class QLineEdit;
 
-class Oscilloscope final : public QObject,
-//        public QMainWindow,
+class Oscilloscope final : public QMainWindow,
                            private NonMoveable<Oscilloscope> {
   Q_OBJECT
 
  public:
   explicit Oscilloscope(
-            QObject* parent = nullptr
-//            QWidget* parent = nullptr
+            QWidget* parent = nullptr
             );
   ~Oscilloscope();
-  static const int BUFFER_SIZE = 8000;
+  static const int BUFFER_SIZE = 4000;
   static const int OSCILL_FREQ_HZ = 64000;
-  QMainWindow* window;
+//  QMainWindow* window;
+
+ signals:
+  void trigger_lvl_updated(int);
+
+public slots:
+  void update_max_width(int curr_max_screen_width);
+  void read_trigger_level();
 
 protected:
-// void resizeEvent(QResizeEvent* event);
- bool eventFilter(QObject *obj, QEvent *event) override;
+ void resizeEvent(QResizeEvent* event);
+ void changeEvent(QEvent *event);
+// bool eventFilter(QObject *obj, QEvent *event) override;
 
  private:
 
@@ -35,5 +42,7 @@ protected:
   DataProcessor* processor;
   DataInterface* dataInterface;
   StrictRingBuffer* buffer;
+
+  QLineEdit* trigger_level;
 };
 #endif  // OSCILLOSCOPE_H

@@ -31,65 +31,86 @@ void DataProcessor::writePacketToBuf(short* packet, int length) {
 //      for (int i = 0; i < length; i++) {
 //          buffer->write_or_rewrite(output[i]);
 //      }
-      short input[8 * length];
-      short output[8 * length];
-      std::fill(input, input + 8 * length, 0);
-      for (int i = 0; i < length; i++) {
-          input[i * 8] = packet[i];
-      }
-      interpol_filter.filter(input, 8 * length,output);
+//      short input[8 * length];
+//      short output[8 * length];
+//      std::fill(input, input + 8 * length, 0);
+//      for (int i = 0; i < length; i++) {
+//          input[i * 8] = packet[i];
+//      }
+//      interpol_filter.filter(input, 8 * length,output);
 
-        //trigger part
+//      apply_trigger(packet, length);
 
-      if (trigger_is_active) {
-          qDebug() << "collected: " << samples_collected;
-
-          if (collecting_is_started && samples_collected < buffer->get_capacity()) {
-              for (int i = 0; (i < 8 * length) && (samples_collected < buffer->get_capacity()); i++) {
-                        buffer->write_or_rewrite(output[i]);
-                        samples_collected++;
-              }
-          }
-          else {
-              int index = 0;
-              for (int i = 0; i < 8 * length; i++) {
-                  if (output[i] > trigger_level) {
-                        collecting_is_started = true;
-                        index = i;
-                        break;
-                  }
-              }
-              if (collecting_is_started) {
-                  for (int i = index; i < 8 * length && (samples_collected < buffer->get_capacity()); i++) {
-                      buffer->write_or_rewrite(output[i]);
-                      samples_collected++;
-                  }
-              }
-          }
-
-          if (samples_collected >= buffer->get_capacity()) {
-              collecting_is_started = false;
-              is_paused = true;
-          }
+      if (continuous_trigger_enabled) {
+        apply_continuous_trigger(packet, length);
       }
       else {
-            for (int i = 0; i < 8 * length; i++) {
-                      buffer->write_or_rewrite(output[i]);
+            for (int i = 0; i < length; i++) {
+              buffer->write_or_rewrite(packet[i]);
             }
-
       }
 
-      /*end of trigger*/
-
-//      for (int i = 0; i < 8 * length; i++) {
-//                buffer->write_or_rewrite(output[i]);
-//      }
-
-
-//      for (int i = 0; i < length; i++) {
-//        buffer->write_or_rewrite(packet[i]);
-//      }
   }
+}
+
+void DataProcessor::toggle_trigger()
+{
+    continuous_trigger_enabled = !continuous_trigger_enabled;
+}
+
+void DataProcessor::set_trigger_level(int trig_lvl)
+{
+    trigger_level = trig_lvl;
+}
+/*
+ * в эту функцию поступают отсчёты и если триггер включен и условия его срабатывания были
+ * удовлетворены ранее или одним из полученных отчетов, то все приходящие отчеты кладутся в
+ * буффер, до его полного заполнения
+*/
+void DataProcessor::apply_trigger(short *samples, int samples_num)
+{
+    if (trigger_enabled) {
+        int i = 0;
+        while (!collecting_is_started && i < samples_num) {
+            collecting_is_started = is_triggered(samples[i++]);
+        }
+        if (collecting_is_started) {
+            i = std::max(0, i - 1); //не пропускаем отсчёт, вызвавший срабатывание триггера
+            while (i < samples_num) {
+//                buffer->write_or_rewrite(samples[i++]);
+                trigger_buf[samples_collected] = samples[i++];
+
+                samples_collected++;
+                // завершаем работу триггера, когда собрали полный буфер отсчётов
+                if (samples_collected >= buffer->get_capacity()) {
+                    for (int i = 0; i < samples_collected; i++) {
+                        buffer->write_or_rewrite(trigger_buf[i]);
+                    }
+                    trigger_enabled = false;
+                    collecting_is_started = false;
+                    samples_collected = 0;
+                    return;
+                }
+            }
+        }
+    }
+}
+
+bool DataProcessor::is_triggered(short sample)
+{
+    bool res = prev_sample < trigger_level && sample >= trigger_level;
+    prev_sample = sample;
+    return res;
+}
+
+void DataProcessor::apply_continuous_trigger(short *samples, int samples_num)
+{
+    if (continuous_trigger_enabled) {
+       apply_trigger(samples, samples_num);
+       if (!trigger_enabled) {
+           trigger_enabled = true;
+       }
+    }
 }
 
 void DataProcessor::set_is_paused_true() {

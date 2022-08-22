@@ -11,11 +11,10 @@ Screen::Screen(int oscill_freq, QWidget* parent) : QWidget(parent), oscill_freq(
   // (если точек на экране (пикселей) меньше чем нужно отобразить, то в этом
   // случае нужно делать децимацию)
   setMinimumSize(700, 500);
-  setMaximumSize(1600, 1000);
+  setMaximumSize(FULL_SCREEN_WIDTH_PX, 1000);
 
   top = 32768;
   bottom = -32768;
-  // setFixedSize(width_pixels, height_pixels);
 
   QPalette pal = QPalette();
   pal.setColor(QPalette::Window, Qt::black);
@@ -52,6 +51,27 @@ int Screen::get_x_scale()
     return x_scale;
 }
 
+void Screen::update_max_width()
+{
+    int samples_available_for_drawing = buffer->get_capacity() - rendered_part_start;
+    max_width = samples_available_for_drawing / x_scale;
+
+    max_width = std::min(FULL_SCREEN_WIDTH_PX, max_width);
+    setMaximumWidth(max_width);
+    emit(update_max_width(max_width));
+    //    qDebug() << "max_w: " << max_width;
+}
+
+void Screen::shift_rendered_part_start(int shift)
+{
+    rendered_part_start -= shift;
+    if (rendered_part_start < 0) {
+        qDebug() << "rendered_part_start < 0";
+        rendered_part_start = 0;
+    }
+    update_max_width();
+}
+
 void Screen::increaseScaleY() {
   // TODO: В моем представлении scale должен быть целым числом.
   // положительные увеличивают кратно, отрицательные уменьшают кратно
@@ -73,6 +93,7 @@ void Screen::decreaseScaleY() {
 void Screen::increaseScaleX() {
   if (x_scale > 1) {
     x_scale--;
+    update_max_width();
     create_grid();
   }
 }
@@ -86,6 +107,7 @@ void Screen::decreaseScaleX() {
     if (excess > 0) {
       rendered_part_start -= excess;
     }
+    update_max_width();
     create_grid();
   }
 }
@@ -96,6 +118,7 @@ void Screen::shiftToLeft() {
       rendered_part_start -= x_scale;
     }
   }
+  update_max_width();
   create_grid();
 }
 
@@ -106,6 +129,7 @@ void Screen::shiftToRight() {
       rendered_part_start += x_scale;
     }
   }
+  update_max_width();
   create_grid();
   //  qDebug() << rendered_part_start;
 }
@@ -136,6 +160,8 @@ void Screen::paintEvent(QPaintEvent*) {
   painter.setPen(pointPen);
 
   painter.drawPolyline(points, width());
+
+//  qDebug() << width();
   //  qDebug() << top << ", " << bottom;
   //  qDebug() << h_grid_step_us << ", " << v_grid_step;
   //  qDebug() << rendered_part_start;
@@ -186,7 +212,10 @@ void Screen::choose_v_grid_step() {
 void Screen::choose_h_grid_step() {
 
     double discretization_period_us = 1000000.0 / oscill_freq;
-    double full_screen_time_us = maximumWidth() * x_scale * discretization_period_us;
+    double full_screen_time_us =
+//            maximumWidth()
+            FULL_SCREEN_WIDTH_PX
+            * x_scale * discretization_period_us;
 
     int k = full_screen_time_us / h_grid_step_us;
     if (k > 8 || k < 4) {

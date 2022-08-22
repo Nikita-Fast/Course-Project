@@ -8,6 +8,7 @@ class StrictRingBuffer {
   StrictRingBuffer(int capacity) {
     this->capacity = capacity;
     buf = new short[capacity];
+    memset(buf, 0, capacity * sizeof(short));
   }
 
   ~StrictRingBuffer() { delete buf; }

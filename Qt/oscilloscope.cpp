@@ -14,14 +14,17 @@
 
 #include <QResizeEvent>
 #include "mywindow.h"
+#include <QSizePolicy>
+#include <QLineEdit>
+#include <QIntValidator>
 
 Oscilloscope::Oscilloscope(
-        QObject*
-//        QWidget* parent
+//        QObject*
+        QWidget* parent
         )
     :
-      window(new MyWindow(nullptr)),
-      screen(new Screen(OSCILL_FREQ_HZ, window)),
+//      window(new MyWindow(nullptr)),
+      screen(new Screen(OSCILL_FREQ_HZ, this)),
       processor(new DataProcessor(OSCILL_FREQ_HZ)),
       dataInterface(new UdpInterface)  // TODO: это внешний интерфейс
 {
@@ -29,7 +32,7 @@ Oscilloscope::Oscilloscope(
   screen->set_buffer(buffer);
   processor->setBuffer(buffer);
 
-  QGroupBox* control_group = new QGroupBox("Панель управления", window);
+  QGroupBox* control_group = new QGroupBox("Панель управления", this);
   QVBoxLayout* btns_lbls_layout = new QVBoxLayout(control_group);
   QPushButton* inc_scale_y_btn = new QPushButton("scale_y++");
   QPushButton* dec_scale_y_btn = new QPushButton("scale_y--");
@@ -41,8 +44,12 @@ Oscilloscope::Oscilloscope(
   QPushButton* dec_scale_x_btn = new QPushButton("scale_x--");
   QPushButton* pause_btn = new QPushButton("pause");
   QPushButton* start_btn = new QPushButton("start");
-  QLabel* scale_y_label = new QLabel("y: 15000");
-  QLabel* scale_x_label = new QLabel("x: ");
+  QPushButton* trigger_btn = new QPushButton("trigger");
+
+   QValidator *validator = new QIntValidator(-24000, 24000, this);
+  trigger_level = new QLineEdit;
+  trigger_level->setValidator(validator);
+  trigger_level->setPlaceholderText("trigger lvl");
 
   // inc_scale_y_btn->setFixedWidth(150);
   btns_lbls_layout->addWidget(inc_scale_x_btn);
@@ -55,14 +62,15 @@ Oscilloscope::Oscilloscope(
   btns_lbls_layout->addWidget(down_shift_btn);
   btns_lbls_layout->addWidget(pause_btn);
   btns_lbls_layout->addWidget(start_btn);
-  btns_lbls_layout->addWidget(scale_y_label);
-  btns_lbls_layout->addWidget(scale_x_label);
+  btns_lbls_layout->addWidget(trigger_btn);
+  btns_lbls_layout->addWidget(trigger_level);
 
-  window->setCentralWidget(screen);
+  setCentralWidget(screen);
 
-  QDockWidget* panel = new QDockWidget(window);
+  QDockWidget* panel = new QDockWidget(this);
   panel->setWidget(control_group);
-  window->addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, panel);
+  panel->setMaximumWidth(141);
+  addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, panel);
 
   connect(dataInterface, SIGNAL(packetSent(short*, int)), processor,
           SLOT(writePacketToBuf(short*, int)));
@@ -77,63 +85,48 @@ Oscilloscope::Oscilloscope(
   connect(right_shift_btn, SIGNAL(clicked()), screen, SLOT(shiftToRight()));
   connect(up_shift_btn, SIGNAL(clicked()), screen, SLOT(shiftUp()));
   connect(down_shift_btn, SIGNAL(clicked()), screen, SLOT(shiftDown()));
-  connect(screen, SIGNAL(send_v_grid_step(int)), scale_y_label,
-          SLOT(setNum(int)));
-  connect(screen, SIGNAL(send_h_grid_step(int)), scale_x_label,
-          SLOT(setNum(int)));
   connect(pause_btn, SIGNAL(clicked()), processor, SLOT(set_is_paused_true()));
   connect(start_btn, SIGNAL(clicked()), processor, SLOT(set_is_paused_false()));
+  connect(trigger_btn, SIGNAL(clicked()), processor, SLOT(toggle_trigger()));
+  connect(trigger_level, SIGNAL(returnPressed()), this, SLOT(read_trigger_level()));
+  connect(this, SIGNAL(trigger_lvl_updated(int)), processor, SLOT(set_trigger_level(int)));
 
-  //screen->installEventFilter(this);
-  //installEventFilter(this);
-  window->installEventFilter(this);
+  connect(screen, SIGNAL(update_max_width(int)), this, SLOT(update_max_width(int)));
 }
 
 Oscilloscope::~Oscilloscope() {
     delete buffer;
 }
 
-//void Oscilloscope::resizeEvent(QResizeEvent *event)
-//{
-////      const QSize sizeEventOld = event->oldSize();
-////      const QSize sizeEvent = event->size();
-////    //  qDebug() << sizeEventOld << ", " << sizeEvent;
-
-////      if (screen-> get_rendered_part_start() + sizeEvent.width() * screen->get_x_scale() > buffer->get_capacity()) {
-////          qDebug() << "went out of buffer";
-////            resize(sizeEventOld);
-////      }
-////      else {
-////          QWidget::resizeEvent(event);
-////      }
-//    QWidget::resizeEvent(event);
-//}
-
-bool Oscilloscope::eventFilter(QObject *obj, QEvent *event)
+void Oscilloscope::update_max_width(int curr_max_screen_width)
 {
-    if (obj == window) {
-        if (event->type() == QEvent::Resize) {
-            QResizeEvent *resize_event = static_cast<QResizeEvent *>(event);
-            const QSize sizeEventOld = resize_event->oldSize();
-            const QSize sizeEvent = resize_event->size();
-            qDebug() << sizeEventOld << ", " << sizeEvent;
-            if (screen->get_rendered_part_start() + sizeEvent.width() * screen->get_x_scale() > buffer->get_capacity()) {
-                int max_w = (buffer->get_capacity() - screen->get_rendered_part_start()) / screen->get_x_scale();
-                screen->resize(max_w, 500);
-                qDebug() << max_w;
-                window->resize(max_w + 140, 500);
-                return true;
-            }
-            else {
-                window->resize(sizeEvent);
-                return true;
-            }
+    int pixels_for_buttons = 141;
+    setMaximumWidth(curr_max_screen_width + pixels_for_buttons);
+    qDebug() << "max_w = " << curr_max_screen_width + pixels_for_buttons;
+}
+
+void Oscilloscope::read_trigger_level()
+{
+    auto s = trigger_level->text();
+    emit(trigger_lvl_updated(s.toInt()));
+}
+
+void Oscilloscope::resizeEvent(QResizeEvent *event)
+{
+      const QSize old_size = event->oldSize();
+      const QSize size = event->size();
+}
+
+void Oscilloscope::changeEvent(QEvent *e)
+{
+    if (e->type() == QEvent::WindowStateChange) {
+        QWindowStateChangeEvent* ev = static_cast<QWindowStateChangeEvent*>(e);
+        if (ev->oldState() == Qt::WindowNoState && width() <= 1840) {
+            qDebug() << "broken full screen" << screen->width() << 1841 - screen->width();
+            int shift_px = 1841 - screen->width();
+            screen->shift_rendered_part_start(shift_px * screen->get_x_scale());
+            qDebug() << "max_w after shift: " << maximumWidth();
+            resize(maximumWidth(), height());
         }
-        else {
-            return false;
-        }
-    }
-    else {
-        return QObject::eventFilter(obj, event);
     }
 }

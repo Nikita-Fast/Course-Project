@@ -9,6 +9,8 @@ class MyWindow : public QMainWindow
 public:
     explicit MyWindow(QWidget *parent = nullptr);
 
+
+
 signals:
 
 };

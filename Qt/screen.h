@@ -20,9 +20,14 @@ class Screen final : public QWidget, private NonMoveable<Screen> {
   int get_rendered_part_start();
   int get_x_scale();
 
+  void update_max_width();
+  const int FULL_SCREEN_WIDTH_PX = 1700;
+  void shift_rendered_part_start(int shift);
+
  signals:
   void send_h_grid_step(int h_grid_step_us);
   void send_v_grid_step(int v_grid_step);
+  void update_max_width(int curr_max_width);
 
  public slots:
 
@@ -38,11 +43,14 @@ class Screen final : public QWidget, private NonMoveable<Screen> {
   void shiftUp();
   void shiftDown();
 
+
  protected:
   void paintEvent(QPaintEvent*);
   void resizeEvent(QResizeEvent* event);
 
  private:
+  int max_width = 700;
+
   const int oscill_freq;
   std::vector<QLabel*> x_labels;
   std::vector<QLabel*> y_labels;
