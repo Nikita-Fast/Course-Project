@@ -12,12 +12,10 @@ SOURCES += \
     dataprocessor.cpp \
     firfilter.cpp \
     main.cpp \
-    mywindow.cpp \
     oscilloscope.cpp \
     screen.cpp \
     uartinterface.cpp \
     udpinterface.cpp \
-    worker.cpp \
     io_uart.cpp \
     CRC16.cpp
 
@@ -26,14 +24,11 @@ HEADERS += \
     datainterface.h \
     dataprocessor.h \
     firfilter.h \
-    mywindow.h \
     nonmoveable.h \
     oscilloscope.h \
-    ringbuffer.h \
     screen.h \
     uartinterface.h \
     udpinterface.h \
-    worker.h \
     io_uart.h \
     CRC16.h
 

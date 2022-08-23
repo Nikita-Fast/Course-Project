@@ -9,21 +9,17 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include "udpinterface.h"
 #include "uartinterface.h"
 
 #include <QResizeEvent>
-#include "mywindow.h"
 #include <QSizePolicy>
 #include <QLineEdit>
 #include <QIntValidator>
+#include <QComboBox>
 
-Oscilloscope::Oscilloscope(
-//        QObject*
-        QWidget* parent
-        )
-    :
-//      window(new MyWindow(nullptr)),
+Oscilloscope::Oscilloscope(QWidget* parent) :
       screen(new Screen(OSCILL_FREQ_HZ, this)),
       processor(new DataProcessor(OSCILL_FREQ_HZ)),
       dataInterface(new UdpInterface)  // TODO: это внешний интерфейс
@@ -32,7 +28,7 @@ Oscilloscope::Oscilloscope(
   screen->set_buffer(buffer);
   processor->setBuffer(buffer);
 
-  QGroupBox* control_group = new QGroupBox("Панель управления", this);
+  QGroupBox* control_group = new QGroupBox("Control panel", this);
   QVBoxLayout* btns_lbls_layout = new QVBoxLayout(control_group);
   QPushButton* inc_scale_y_btn = new QPushButton("scale_y++");
   QPushButton* dec_scale_y_btn = new QPushButton("scale_y--");
@@ -45,13 +41,17 @@ Oscilloscope::Oscilloscope(
   QPushButton* pause_btn = new QPushButton("pause");
   QPushButton* start_btn = new QPushButton("start");
   QPushButton* trigger_btn = new QPushButton("trigger");
+  QLabel* trigger_mode_lbl = new QLabel("trigger mode:");
 
-   QValidator *validator = new QIntValidator(-24000, 24000, this);
+  QValidator *validator = new QIntValidator(-32768, 32767, this);
   trigger_level = new QLineEdit;
   trigger_level->setValidator(validator);
   trigger_level->setPlaceholderText("trigger lvl");
 
-  // inc_scale_y_btn->setFixedWidth(150);
+  trigger_mode = new QComboBox(this);
+  trigger_mode->addItem("continious");
+  trigger_mode->addItem("one-time");
+
   btns_lbls_layout->addWidget(inc_scale_x_btn);
   btns_lbls_layout->addWidget(dec_scale_x_btn);
   btns_lbls_layout->addWidget(inc_scale_y_btn);
@@ -63,19 +63,21 @@ Oscilloscope::Oscilloscope(
   btns_lbls_layout->addWidget(pause_btn);
   btns_lbls_layout->addWidget(start_btn);
   btns_lbls_layout->addWidget(trigger_btn);
+  btns_lbls_layout->addWidget(trigger_mode_lbl);
+  btns_lbls_layout->addWidget(trigger_mode);
   btns_lbls_layout->addWidget(trigger_level);
+  btns_lbls_layout->addStretch();
 
   setCentralWidget(screen);
 
   QDockWidget* panel = new QDockWidget(this);
   panel->setWidget(control_group);
+  panel->setMinimumWidth(141);
   panel->setMaximumWidth(141);
   addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, panel);
 
   connect(dataInterface, SIGNAL(packetSent(short*, int)), processor,
           SLOT(writePacketToBuf(short*, int)));
-  //  connect(processor, SIGNAL(sendFrameToScreen(short*, int)), screen,
-  //          SLOT(receiveFrame(short*, int)));
 
   connect(inc_scale_y_btn, SIGNAL(clicked()), screen, SLOT(increaseScaleY()));
   connect(dec_scale_y_btn, SIGNAL(clicked()), screen, SLOT(decreaseScaleY()));
@@ -90,6 +92,7 @@ Oscilloscope::Oscilloscope(
   connect(trigger_btn, SIGNAL(clicked()), processor, SLOT(toggle_trigger()));
   connect(trigger_level, SIGNAL(returnPressed()), this, SLOT(read_trigger_level()));
   connect(this, SIGNAL(trigger_lvl_updated(int)), processor, SLOT(set_trigger_level(int)));
+  connect(trigger_mode, SIGNAL(currentIndexChanged(int)), processor, SLOT(change_trigger_mode(int)));
 
   connect(screen, SIGNAL(update_max_width(int)), this, SLOT(update_max_width(int)));
 }
@@ -102,19 +105,12 @@ void Oscilloscope::update_max_width(int curr_max_screen_width)
 {
     int pixels_for_buttons = 141;
     setMaximumWidth(curr_max_screen_width + pixels_for_buttons);
-    qDebug() << "max_w = " << curr_max_screen_width + pixels_for_buttons;
 }
 
 void Oscilloscope::read_trigger_level()
 {
     auto s = trigger_level->text();
     emit(trigger_lvl_updated(s.toInt()));
-}
-
-void Oscilloscope::resizeEvent(QResizeEvent *event)
-{
-      const QSize old_size = event->oldSize();
-      const QSize size = event->size();
 }
 
 void Oscilloscope::changeEvent(QEvent *e)

@@ -57,9 +57,9 @@ void Screen::update_max_width()
     max_width = samples_available_for_drawing / x_scale;
 
     max_width = std::min(FULL_SCREEN_WIDTH_PX, max_width);
+    qDebug() << maximumWidth() << ", after = " << max_width;
     setMaximumWidth(max_width);
     emit(update_max_width(max_width));
-    //    qDebug() << "max_w: " << max_width;
 }
 
 void Screen::shift_rendered_part_start(int shift)
@@ -124,18 +124,20 @@ void Screen::shiftToLeft() {
 
 void Screen::shiftToRight() {
   for (int i = 0; i < 100; i++) {
-    if (rendered_part_start + x_scale + width() * x_scale <=
-        buffer->get_capacity()) {
+      int a = rendered_part_start + x_scale + width() * x_scale;
+      int b = buffer->get_capacity();
+      if (i == 0) qDebug() << a << ", " << b;
+    if (a <= b && (x_scale < b - a)) {
       rendered_part_start += x_scale;
+//      qDebug() << rendered_part_start;
     }
   }
+
   update_max_width();
   create_grid();
-  //  qDebug() << rendered_part_start;
 }
 
 void Screen::shiftUp() {
-  // pivot_y += 25;
   int diff = (RANGE / y_scale) / 10;
   top += diff;
   bottom += diff;
@@ -143,7 +145,6 @@ void Screen::shiftUp() {
 }
 
 void Screen::shiftDown() {
-  // pivot_y -= 25;
   int diff = (RANGE / y_scale) / 10;
   top -= diff;
   bottom -= diff;
@@ -156,15 +157,10 @@ void Screen::paintEvent(QPaintEvent*) {
   drawGrid();
   QPainter painter(this);
 
-  QPen pointPen(Qt::red, 4);
+  QPen pointPen(Qt::red, 2);
   painter.setPen(pointPen);
 
   painter.drawPolyline(points, width());
-
-//  qDebug() << width();
-  //  qDebug() << top << ", " << bottom;
-  //  qDebug() << h_grid_step_us << ", " << v_grid_step;
-  //  qDebug() << rendered_part_start;
 }
 
 void Screen::update_top_bottom() {
@@ -178,22 +174,9 @@ void Screen::update_top_bottom() {
   bottom -= diff - inc_up;
 }
 
-void Screen::resizeEvent(QResizeEvent* event) {
+void Screen::resizeEvent(QResizeEvent*) {
   update_top_bottom();
   create_grid();
-
-//  const QSize sizeEventOld = event->oldSize();
-//  const QSize sizeEvent = event->size();
-//  qDebug() << sizeEventOld << ", " << sizeEvent;
-
-//  if (rendered_part_start + sizeEvent.width() * x_scale > buffer->get_capacity()) {
-//      qDebug() << "went out of buffer";
-//        resize(sizeEventOld);
-//  }
-//  else {
-//      QWidget::resizeEvent(event);
-//  }
-//  QWidget::resizeEvent(event);
 }
 
 void Screen::choose_v_grid_step() {

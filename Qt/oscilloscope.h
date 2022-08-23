@@ -10,6 +10,7 @@ class DataInterface;
 class StrictRingBuffer;
 class MyWindow;
 class QLineEdit;
+class QComboBox;
 
 class Oscilloscope final : public QMainWindow,
                            private NonMoveable<Oscilloscope> {
@@ -22,7 +23,6 @@ class Oscilloscope final : public QMainWindow,
   ~Oscilloscope();
   static const int BUFFER_SIZE = 4000;
   static const int OSCILL_FREQ_HZ = 64000;
-//  QMainWindow* window;
 
  signals:
   void trigger_lvl_updated(int);
@@ -32,9 +32,7 @@ public slots:
   void read_trigger_level();
 
 protected:
- void resizeEvent(QResizeEvent* event);
  void changeEvent(QEvent *event);
-// bool eventFilter(QObject *obj, QEvent *event) override;
 
  private:
 
@@ -44,5 +42,6 @@ protected:
   StrictRingBuffer* buffer;
 
   QLineEdit* trigger_level;
+  QComboBox* trigger_mode;
 };
 #endif  // OSCILLOSCOPE_H

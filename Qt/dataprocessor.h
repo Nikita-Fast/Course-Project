@@ -14,9 +14,13 @@ class DataProcessor : public QObject {
   void setBuffer(StrictRingBuffer* buffer);
 
   bool trigger_enabled = true;
+  bool paused_after_trigger = false;
   bool continuous_trigger_enabled = true;
   short trigger_level = 5000;
-  short prev_sample = 32767;
+
+  StrictRingBuffer* samples_delay_line;
+
+
   bool collecting_is_started = false;
   int samples_collected = 0;
   short trigger_buf[4000];
@@ -29,6 +33,7 @@ class DataProcessor : public QObject {
 
   void toggle_trigger();
   void set_trigger_level(int);
+  void change_trigger_mode(int);
 
  private:
 
@@ -39,8 +44,6 @@ class DataProcessor : public QObject {
   void apply_trigger(short* samples, int samples_num);
   bool is_triggered(short sample);
   void apply_continuous_trigger(short* samples, int samples_num);
-
-  int iterations = 0;
 
 };
 
