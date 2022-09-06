@@ -151,10 +151,29 @@ void Screen::shiftDown() {
   create_grid();
 }
 
+void Screen::set_trigger_level(int lvl)
+{
+    trigger_lvl = lvl;
+}
+
+void Screen::toggle_trigger()
+{
+    trigger_enabled = !trigger_enabled;
+}
+
+void Screen::set_trigger_offset(int offset)
+{
+    trigger_offset_in_samples = offset;
+}
+
 void Screen::paintEvent(QPaintEvent*) {
   convertBufferToPoints();
 
   drawGrid();
+  if (trigger_enabled) {
+      draw_trigger_lvl();
+      draw_trigger_offset();
+  }
   QPainter painter(this);
 
   QPen pointPen(Qt::red, 2);
@@ -305,6 +324,27 @@ void Screen::convertBufferToPoints() {
 
     points[i] = QPoint(i, point_y_pos);
   }
+}
+
+void Screen::draw_trigger_lvl()
+{
+    QPainter painter(this);
+    QPen gridPen(Qt::green, 0, Qt::DashLine);
+    painter.setPen(gridPen);
+
+    double pixel_y_size = (top - bottom) / (double)height();
+    int y_pos = height() - ((trigger_lvl - bottom) / pixel_y_size);
+    painter.drawLine(0, y_pos,width(), y_pos);
+}
+
+void Screen::draw_trigger_offset()
+{
+    QPainter painter(this);
+    QPen gridPen(Qt::green, 0, Qt::DashLine);
+    painter.setPen(gridPen);
+
+    int x_pos = (trigger_offset_in_samples - rendered_part_start) / x_scale;
+    painter.drawLine(x_pos, 0, x_pos, maximumHeight() - 1);
 }
 
 void Screen::drawGrid() {

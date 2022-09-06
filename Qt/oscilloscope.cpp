@@ -48,6 +48,11 @@ Oscilloscope::Oscilloscope(QWidget* parent) :
   trigger_level->setValidator(validator);
   trigger_level->setPlaceholderText("trigger lvl");
 
+  QValidator *trig_offset_validator = new QIntValidator(0, BUFFER_SIZE - 1, this);
+  trigger_offset = new QLineEdit;
+  trigger_offset->setValidator(trig_offset_validator);
+  trigger_offset->setPlaceholderText("trigger offset");
+
   trigger_mode = new QComboBox(this);
   trigger_mode->addItem("continious");
   trigger_mode->addItem("one-time");
@@ -66,6 +71,7 @@ Oscilloscope::Oscilloscope(QWidget* parent) :
   btns_lbls_layout->addWidget(trigger_mode_lbl);
   btns_lbls_layout->addWidget(trigger_mode);
   btns_lbls_layout->addWidget(trigger_level);
+  btns_lbls_layout->addWidget(trigger_offset);
   btns_lbls_layout->addStretch();
 
   setCentralWidget(screen);
@@ -89,10 +95,19 @@ Oscilloscope::Oscilloscope(QWidget* parent) :
   connect(down_shift_btn, SIGNAL(clicked()), screen, SLOT(shiftDown()));
   connect(pause_btn, SIGNAL(clicked()), processor, SLOT(set_is_paused_true()));
   connect(start_btn, SIGNAL(clicked()), processor, SLOT(set_is_paused_false()));
+
   connect(trigger_btn, SIGNAL(clicked()), processor, SLOT(toggle_trigger()));
+  connect(trigger_btn, SIGNAL(clicked()), screen, SLOT(toggle_trigger()));
   connect(trigger_level, SIGNAL(returnPressed()), this, SLOT(read_trigger_level()));
   connect(this, SIGNAL(trigger_lvl_updated(int)), processor, SLOT(set_trigger_level(int)));
+  connect(this, SIGNAL(trigger_lvl_updated(int)), screen, SLOT(set_trigger_level(int)));
   connect(trigger_mode, SIGNAL(currentIndexChanged(int)), processor, SLOT(change_trigger_mode(int)));
+
+  connect(trigger_offset, SIGNAL(returnPressed()), this, SLOT(read_trigger_offset()));
+  connect(this, SIGNAL(trigger_offset_updated(int)), processor, SLOT(set_trigger_offset(int)));
+  connect(this, SIGNAL(trigger_offset_updated(int)), screen, SLOT(set_trigger_offset(int)));
+
+
 
   connect(screen, SIGNAL(update_max_width(int)), this, SLOT(update_max_width(int)));
 }
@@ -111,6 +126,12 @@ void Oscilloscope::read_trigger_level()
 {
     auto s = trigger_level->text();
     emit(trigger_lvl_updated(s.toInt()));
+}
+
+void Oscilloscope::read_trigger_offset()
+{
+    auto offset = trigger_offset->text();
+    emit(trigger_offset_updated(offset.toInt()));
 }
 
 void Oscilloscope::changeEvent(QEvent *e)

@@ -26,10 +26,12 @@ class Oscilloscope final : public QMainWindow,
 
  signals:
   void trigger_lvl_updated(int);
+  void trigger_offset_updated(int);
 
 public slots:
   void update_max_width(int curr_max_screen_width);
   void read_trigger_level();
+  void read_trigger_offset();
 
 protected:
  void changeEvent(QEvent *event);
@@ -43,5 +45,7 @@ protected:
 
   QLineEdit* trigger_level;
   QComboBox* trigger_mode;
+  QLineEdit* trigger_offset;
+  int trigger_offset_in_samples = 0;
 };
 #endif  // OSCILLOSCOPE_H

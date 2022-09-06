@@ -13,17 +13,20 @@ class DataProcessor : public QObject {
   explicit DataProcessor(int oscill_freq,QObject* parent = nullptr);
   void setBuffer(StrictRingBuffer* buffer);
 
-  bool trigger_enabled = true;
+  bool trigger_enabled = false;
   bool paused_after_trigger = false;
   bool continuous_trigger_enabled = true;
   short trigger_level = 5000;
 
   StrictRingBuffer* samples_delay_line;
+  StrictRingBuffer* before_trigger_buffer;
+
 
 
   bool collecting_is_started = false;
   int samples_collected = 0;
   short trigger_buf[4000];
+  int trigger_offset_in_samples = 0;
 
  public slots:
   void set_is_paused_true();  // TODO: это ай яй яй
@@ -34,6 +37,7 @@ class DataProcessor : public QObject {
   void toggle_trigger();
   void set_trigger_level(int);
   void change_trigger_mode(int);
+  void set_trigger_offset(int);
 
  private:
 

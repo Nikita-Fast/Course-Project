@@ -24,6 +24,7 @@ class Screen final : public QWidget, private NonMoveable<Screen> {
   const int FULL_SCREEN_WIDTH_PX = 1700;
   void shift_rendered_part_start(int shift);
 
+
  signals:
   void send_h_grid_step(int h_grid_step_us);
   void send_v_grid_step(int v_grid_step);
@@ -31,8 +32,7 @@ class Screen final : public QWidget, private NonMoveable<Screen> {
 
  public slots:
 
-  void
-  increaseScaleY();  // TODO: зачем нам изменение масштаба шагами? Почему нельзя
+  void increaseScaleY();  // TODO: зачем нам изменение масштаба шагами? Почему нельзя
                      // установить тот масштаб, который нужно? Чему равен шаг?
   void decreaseScaleY();
   void increaseScaleX();
@@ -43,12 +43,20 @@ class Screen final : public QWidget, private NonMoveable<Screen> {
   void shiftUp();
   void shiftDown();
 
+  void set_trigger_level(int);
+  void toggle_trigger();
+
+  void set_trigger_offset(int);
+
 
  protected:
   void paintEvent(QPaintEvent*);
   void resizeEvent(QResizeEvent* event);
 
  private:
+  short trigger_enabled = false;
+  short trigger_lvl;
+  int trigger_offset_in_samples = 0;
   int max_width = 700;
 
   const int oscill_freq;
@@ -86,6 +94,9 @@ class Screen final : public QWidget, private NonMoveable<Screen> {
   const int grid_vertical_segments = 5;
 
   bool is_paused = false;
+
+  void draw_trigger_lvl();
+  void draw_trigger_offset(); // нарисовать вертикальную линию, показывающую смещение триггера по горизонтали
 };
 
 #endif  // SCREEN_H

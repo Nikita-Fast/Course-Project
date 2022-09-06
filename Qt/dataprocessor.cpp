@@ -16,7 +16,8 @@
 //FIRFilter interpol_filter(interpol_imp_resp, 251);
 
 DataProcessor::DataProcessor(int osc_freq, QObject* parent) : QObject(parent), oscill_freq (osc_freq) {
-    samples_delay_line = new StrictRingBuffer(10);
+    samples_delay_line = new StrictRingBuffer(15);
+    before_trigger_buffer = new StrictRingBuffer(4000);
 }
 
 void DataProcessor::setBuffer(StrictRingBuffer* buffer){
@@ -40,6 +41,9 @@ void DataProcessor::writePacketToBuf(short* packet, int length) {
 //      interpol_filter.filter(input, 8 * length,output);
 
 //      apply_trigger(packet, length);
+
+
+
       if (!paused_after_trigger) {
           if (trigger_enabled) {
               if (continuous_trigger_enabled) {
@@ -56,14 +60,6 @@ void DataProcessor::writePacketToBuf(short* packet, int length) {
           }
       }
 
-//      if (continuous_trigger_enabled) {
-//        apply_continuous_trigger(packet, length);
-//      }
-//      else {
-//            for (int i = 0; i < length; i++) {
-//              buffer->write_or_rewrite(packet[i]);
-//            }
-//      }
   }
 }
 
@@ -97,6 +93,11 @@ void DataProcessor::change_trigger_mode(int mode_index)
 //        continuous_trigger_enabled = false;
     }
 }
+
+void DataProcessor::set_trigger_offset(int offset)
+{
+    trigger_offset_in_samples = offset;
+}
 /*
  * в эту функцию поступают отсчёты и если триггер включен и условия его срабатывания были
  * удовлетворены ранее или одним из полученных отчетов, то все приходящие отчеты кладутся в
@@ -107,10 +108,11 @@ void DataProcessor::apply_trigger(short *samples, int samples_num)
     if (trigger_enabled) {
         int i = 0;
         while (!collecting_is_started && i < samples_num) {
+            before_trigger_buffer->write_or_rewrite(samples[i]);
             collecting_is_started = is_triggered(samples[i++]);
         }
         if (collecting_is_started) {
-            i = std::max(0, i - 1); //не пропускаем отсчёт, вызвавший срабатывание триггера
+//            i = std::max(0, i - 1); //не пропускаем отсчёт, вызвавший срабатывание триггера
             while (i < samples_num) {
                 samples_delay_line->write_or_rewrite(samples[i]);
 
@@ -118,10 +120,17 @@ void DataProcessor::apply_trigger(short *samples, int samples_num)
                 samples_collected++;
                 // завершаем работу триггера, когда собрали полный буфер отсчётов
                 if (samples_collected >= buffer->get_capacity()) {
-                    for (int i = 0; i < samples_collected; i++) {
+
+                    int start_ind = before_trigger_buffer->get_w_index() - trigger_offset_in_samples +
+                            before_trigger_buffer->get_capacity();
+//                    qDebug() << start_ind << " " << before_trigger_buffer->get_w_index();
+                    for (int i = 0; i < trigger_offset_in_samples; i++) {
+                        buffer->write_or_rewrite(before_trigger_buffer->peekAt(start_ind + i));
+                    }
+
+                    for (int i = 0; i < samples_collected - trigger_offset_in_samples; i++) {
                         buffer->write_or_rewrite(trigger_buf[i]);
                     }
-//                    trigger_enabled = false;
                     collecting_is_started = false;
                     samples_collected = 0;
                     if (!continuous_trigger_enabled) {
@@ -133,6 +142,7 @@ void DataProcessor::apply_trigger(short *samples, int samples_num)
         }
     }
 }
+
 
 bool DataProcessor::is_triggered(short sample)
 {
@@ -146,9 +156,6 @@ void DataProcessor::apply_continuous_trigger(short *samples, int samples_num)
 {
     if (continuous_trigger_enabled) {
        apply_trigger(samples, samples_num);
-//       if (!trigger_enabled) {
-//           trigger_enabled = true;
-//       }
     }
 }
 
