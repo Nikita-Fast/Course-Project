@@ -10,7 +10,7 @@ class StrictRingBuffer;
 class DataProcessor : public QObject {
   Q_OBJECT
  public:
-  explicit DataProcessor(int oscill_freq,QObject* parent = nullptr);
+  explicit DataProcessor(int oscill_freq, QObject* parent = nullptr);
   void setBuffer(StrictRingBuffer* buffer);
 
   bool trigger_enabled = false;
@@ -21,11 +21,9 @@ class DataProcessor : public QObject {
   StrictRingBuffer* samples_delay_line;
   StrictRingBuffer* before_trigger_buffer;
 
-
-
   bool collecting_is_started = false;
   int samples_collected = 0;
-  short trigger_buf[4000];
+  short* trigger_buf;
   int trigger_offset_in_samples = 0;
 
  public slots:
@@ -40,7 +38,6 @@ class DataProcessor : public QObject {
   void set_trigger_offset(int);
 
  private:
-
   bool is_paused = false;
   static const int input_freq = 64000;
   const int oscill_freq;
@@ -48,7 +45,6 @@ class DataProcessor : public QObject {
   void apply_trigger(short* samples, int samples_num);
   bool is_triggered(short sample);
   void apply_continuous_trigger(short* samples, int samples_num);
-
 };
 
 #endif  // DATAPROCESSOR_H
