@@ -3,7 +3,7 @@ package com.company;
 import java.nio.ByteBuffer;
 
 public class SignalGenerator {
-    public static final int SAMPLING_RATE = 8_000;
+    public static final int SAMPLING_RATE = 64_000;
 
     public static short[] getSamplesOfSineSignal(double baseTime) {
         int numberOfSamples = UDPSender.PACKET_SIZE / 2;
@@ -34,12 +34,12 @@ public class SignalGenerator {
     }
 
     public static short sineSignal(double time) {
-        double sigma = 0.2;
-        double v = Math.sin(time * 2 * Math.PI * 10) + Math.sin(time * 2 * Math.PI * 100)
+        double sigma = 0.02;
+        double v = Math.sin(time * 2 * Math.PI * 100)
                 + Math.random() * sigma
                 ;
 //        v *= 32767;
-        v*=10000;
+        v*=15000;
         return (short)v;
     }
 

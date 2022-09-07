@@ -4,7 +4,9 @@ public class Main {
 
     public static void main(String[] args) {
 
-        UDPSender.send(1500, ((SignalGenerator.SAMPLING_RATE * 2) / 1024.0));
+//        UDPSender.send(1500, ((SignalGenerator.SAMPLING_RATE * 2) / 1024.0));
+        String path = "/home/nikita/PycharmProjects/DSP/modulation/out.txt";
+        UDPSender.sendFromFile(path, 512);
         System.out.println("end");
     }
 }
