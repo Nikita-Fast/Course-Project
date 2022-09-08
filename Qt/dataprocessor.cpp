@@ -46,15 +46,18 @@ void DataProcessor::writePacketToBuf(short* packet, int length) {
 
     if (!paused_after_trigger) {
       if (trigger_enabled) {
-        if (continuous_trigger_enabled) {
-          apply_continuous_trigger(packet, length);
-        } else {
-          apply_trigger(packet, length);
-        }
+        apply_trigger(packet, length);
       } else {
         for (int i = 0; i < length; i++) {
           buffer->write_or_rewrite(packet[i]);
+          samples_delay_line->write_or_rewrite(packet[i]);
+          before_trigger_buffer->write_or_rewrite(packet[i]);
         }
+      }
+    } else {
+      for (int i = 0; i < length; i++) {
+        samples_delay_line->write_or_rewrite(packet[i]);
+        before_trigger_buffer->write_or_rewrite(packet[i]);
       }
     }
   }
@@ -76,15 +79,10 @@ void DataProcessor::change_trigger_mode(int mode_index) {
     case 0:
       continuous_trigger_enabled = true;
       paused_after_trigger = false;
-      //        trigger_enabled = true;
       break;
     case 1:
-      //        trigger_enabled = true;
       continuous_trigger_enabled = false;
       break;
-      //    case 2 :
-      //        trigger_enabled = false;
-      //        continuous_trigger_enabled = false;
   }
 }
 
@@ -134,11 +132,16 @@ void DataProcessor::apply_trigger(short* samples, int samples_num) {
         for (int i = 0; i < trigger_offset_in_samples; i++) {
           buffer->write_or_rewrite(
               before_trigger_buffer->peekAt(start_ind + i));
+          //          qDebug() << i << ", " <<
+          //          before_trigger_buffer->peekAt(start_ind + i);
         }
-
+        //        qDebug() << "++++++++++++++++";
         for (int i = 0; i < need_to_collect; i++) {
           buffer->write_or_rewrite(trigger_buf[i]);
+          //          qDebug() << i + trigger_offset_in_samples << ", " <<
+          //          trigger_buf[i];
         }
+        //        qDebug() << "------------------------------";
 
         if (i < samples_num) {
           //#2
@@ -164,70 +167,7 @@ void DataProcessor::apply_trigger(short* samples, int samples_num) {
         //обработка не требуется
         return;
       }
-
-      //******************************* end of new version of method
-
-      //      int samples_left = samples_num - i;
-      //      int need_to_collect =
-      //          //      int free_positions = buffer->get_capacity() -
-      //          //      samples_collected;
-
-      //          while (samples_left > 0 && free_positions > 0) {
-      //        samples_delay_line->write_or_rewrite(samples[i]);
-
-      //        //есть переполнение буфера
-      //        trigger_buf[samples_collected] = samples[i++];
-      //        samples_collected++;
-
-      //        samples_left = samples_num - i;
-      //        free_positions = buffer->get_capacity() - samples_collected;
-
-      // завершаем работу триггера, когда собрали полный буфер отсчётов
-      //        if (samples_collected >= buffer->get_capacity()) {
-      //          int start_ind = before_trigger_buffer->get_w_index() -
-      //                          trigger_offset_in_samples +
-      //                          before_trigger_buffer->get_capacity();
-
-      //          for (int i = 0; i < trigger_offset_in_samples; i++) {
-      //            buffer->write_or_rewrite(
-      //                before_trigger_buffer->peekAt(start_ind + i));
-      //          }
-
-      //          for (int i = 0; i < samples_collected -
-      //          trigger_offset_in_samples;
-      //               i++) {
-      //            buffer->write_or_rewrite(trigger_buf[i]);
-      //          }
-      //          collecting_is_started = false;
-      //          samples_collected = 0;
-
-      //          if (!continuous_trigger_enabled) {
-      //            paused_after_trigger = true;
-      //          }
-
-      //          return;
-      //        }
     }
-
-    //      if (free_positions == 0) {
-    //        //кладём сэмплы в буфер экрана
-
-    //        int start_ind = before_trigger_buffer->get_w_index() -
-    //                        trigger_offset_in_samples +
-    //                        before_trigger_buffer->get_capacity();
-
-    //        for (int i = 0; i < trigger_offset_in_samples; i++) {
-    //          buffer->write_or_rewrite(
-    //              before_trigger_buffer->peekAt(start_ind + i));
-    //        }
-
-    //        for (int i = 0; i < samples_collected - trigger_offset_in_samples;
-    //             i++) {
-    //          buffer->write_or_rewrite(trigger_buf[i]);
-    //        }
-    //        collecting_is_started = false;
-    //        samples_collected = 0;
-    //      }
   }
 }
 
