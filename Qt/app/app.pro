@@ -6,4 +6,4 @@ TEMPLATE = app
 
 SOURCES += main.cpp
 
-LIBS += -L../src -lmyapp
+LIBS += -L../lib -loscill_lib

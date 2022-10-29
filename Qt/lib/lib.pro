@@ -2,7 +2,7 @@ include(../defaults.pri)
 QT       += core gui widgets network serialport
 
 TEMPLATE = lib
-TARGET = myapp
+TARGET = oscill_lib
 
 SOURCES += \
     dataprocessor.cpp \

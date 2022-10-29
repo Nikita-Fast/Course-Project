@@ -1,8 +1,6 @@
-include(../defaults.pri)
-TEMPLATE = app
+TEMPLATE = subdirs
 
-QT += testlib
+SUBDIRS += \
+    test_moving_average_filter \
+    test_ring_buffer
 
-SOURCES += main.cpp
-
-LIBS += -L../src -lmyapp

@@ -2,22 +2,22 @@
 #include <vector>
 #include "moving_average_filter.h"
 
-class Tests : public QObject {
+class TestMovingAverageFilter : public QObject {
   Q_OBJECT
 
  public:
-  Tests();
-  ~Tests();
+  TestMovingAverageFilter();
+  ~TestMovingAverageFilter();
 
  private slots:
-  void test_moving_average_filter();
+  void test_filter();
 };
 
-Tests::Tests() {}
+TestMovingAverageFilter::TestMovingAverageFilter() {}
 
-Tests::~Tests() {}
+TestMovingAverageFilter::~TestMovingAverageFilter() {}
 
-void Tests::test_moving_average_filter() {
+void TestMovingAverageFilter::test_filter() {
   int window_size = 4;
   MovingAverageFilter filter(window_size);
 
@@ -52,6 +52,6 @@ void Tests::test_moving_average_filter() {
   QCOMPARE(expected, v);
 }
 
-QTEST_APPLESS_MAIN(Tests)
+QTEST_APPLESS_MAIN(TestMovingAverageFilter)
 
 #include "main.moc"
