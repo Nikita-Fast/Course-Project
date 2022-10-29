@@ -1,4 +1,4 @@
-QT       += core gui network serialport
+QT       += core gui network serialport testlib
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -12,8 +12,10 @@ SOURCES += \
     dataprocessor.cpp \
     firfilter.cpp \
     main.cpp \
+    moving_averagef_ilter.cpp \
     oscilloscope.cpp \
     screen.cpp \
+    test_example.cpp \
     uartinterface.cpp \
     udpinterface.cpp \
     io_uart.cpp \
@@ -24,6 +26,7 @@ HEADERS += \
     datainterface.h \
     dataprocessor.h \
     firfilter.h \
+    moving_average_filter.h \
     nonmoveable.h \
     oscilloscope.h \
     screen.h \

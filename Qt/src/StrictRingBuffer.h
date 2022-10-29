@@ -13,6 +13,14 @@ class StrictRingBuffer {
 
   ~StrictRingBuffer() { delete buf; }
 
+  int sum() {
+    int sum = 0;
+    for (int i = 0; i < capacity; i++) {
+      sum += buf[i];
+    }
+    return sum;
+  }
+
   void write(short value) {
     if (isFull()) {
       qDebug() << "can't write values to a full buffer";
